@@ -494,10 +494,7 @@ generate_profile_markdown() {
 ![Pushes](https://img.shields.io/badge/Pushes-${total_pushes}-green?style=for-the-badge&logo=git&logoColor=white)
 
 ### 📈 Progress to Next Level
-\`\`\`
-Level ${level} [${'█'.repeat(xp_percent/5)}${'░'.repeat(20-xp_percent/5)}] ${xp_percent}%
-${xp}/${next_level_xp} XP
-\`\`\`
+$(printf "Level %d [" "$level")$(printf '█%.0s' $(seq 1 $((xp_percent/5))))$(printf '░%.0s' $(seq 1 $((20-xp_percent/5))))$(printf "] %d%%\n%d/%d XP" "$xp_percent" "$xp" "$next_level_xp")
 
 </td>
 <td width="50%">
