@@ -188,6 +188,18 @@ for arg in "$@"; do
             turn_off_all_notifications
             exit 0
             ;;
+        --install)
+            install_system_wide
+            exit 0
+            ;;
+        --update)
+            update_tool
+            exit 0
+            ;;
+        --version)
+            show_version
+            exit 0
+            ;;
         --theme)
             shift
             if [ -n "$1" ]; then
@@ -524,6 +536,144 @@ turn_off_all_notifications() {
     
     echo -e "${GREEN}✅ 全ての通知が無効化されました${NC}"
     echo -e "${GRAY}静かで平和なgit pushをお楽しみください 😌${NC}"
+}
+
+# バージョン情報
+TOOL_VERSION="2.0.0"
+TOOL_REPO="https://github.com/daideguchi/git-autopush"
+
+# バージョン表示
+show_version() {
+    echo -e "${GOLD}🚀 Git Auto Push Tool${NC}"
+    echo -e "${CYAN}Version: ${TOOL_VERSION}${NC}"
+    echo -e "${GRAY}Repository: ${TOOL_REPO}${NC}"
+    echo -e "${GRAY}Config: ${CONFIG_FILE}${NC}"
+    echo -e "${GRAY}Data: ${STATS_DIR}${NC}"
+}
+
+# システム全体にインストール
+install_system_wide() {
+    echo -e "${GOLD}🔧 Git Auto Push Tool をシステム全体にインストール${NC}"
+    echo ""
+    
+    # インストール先ディレクトリ
+    local install_dir="$HOME/bin"
+    local install_path="$install_dir/git-autopush"
+    
+    # binディレクトリ作成
+    mkdir -p "$install_dir"
+    
+    # 現在のスクリプトをコピー
+    cp "$0" "$install_path"
+    chmod +x "$install_path"
+    
+    # エイリアス設定
+    echo ""
+    echo -e "${CYAN}📝 シェル設定を更新しています...${NC}"
+    
+    # .bashrc の更新
+    if ! grep -q "alias ap=" ~/.bashrc 2>/dev/null; then
+        echo "# Git Auto Push Tool" >> ~/.bashrc
+        echo "export PATH=\"\$HOME/bin:\$PATH\"" >> ~/.bashrc
+        echo "alias ap='$install_path'" >> ~/.bashrc
+    else
+        sed -i '' "s|alias ap=.*|alias ap='$install_path'|" ~/.bashrc
+    fi
+    
+    # .zshrc の更新
+    if ! grep -q "alias ap=" ~/.zshrc 2>/dev/null; then
+        echo "# Git Auto Push Tool" >> ~/.zshrc
+        echo "export PATH=\"\$HOME/bin:\$PATH\"" >> ~/.zshrc
+        echo "alias ap='$install_path'" >> ~/.zshrc
+    else
+        sed -i '' "s|alias ap=.*|alias ap='$install_path'|" ~/.zshrc
+    fi
+    
+    # .profile の更新
+    if ! grep -q "alias ap=" ~/.profile 2>/dev/null; then
+        echo "# Git Auto Push Tool" >> ~/.profile
+        echo "export PATH=\"\$HOME/bin:\$PATH\"" >> ~/.profile
+        echo "alias ap='$install_path'" >> ~/.profile
+    else
+        sed -i '' "s|alias ap=.*|alias ap='$install_path'|" ~/.profile
+    fi
+    
+    echo -e "${GREEN}✅ インストール完了！${NC}"
+    echo ""
+    echo -e "${YELLOW}📍 インストール場所: ${install_path}${NC}"
+    echo -e "${CYAN}🔄 シェルを再起動するか、以下を実行してください:${NC}"
+    echo -e "${GRAY}   source ~/.zshrc${NC}"
+    echo -e "${GRAY}   source ~/.bashrc${NC}"
+    echo ""
+    echo -e "${SPARKLES}${GREEN} これで全プロジェクトで同じ最新版が使用されます！${NC}"
+}
+
+# ツール更新
+update_tool() {
+    echo -e "${GOLD}⬆️  Git Auto Push Tool を更新中...${NC}"
+    echo ""
+    
+    # インストール先パス
+    local install_path="$HOME/bin/git-autopush"
+    
+    if [ -f "$install_path" ]; then
+        # 既存の設定バックアップ
+        echo -e "${CYAN}📋 設定をバックアップ中...${NC}"
+        cp -r "$STATS_DIR" "$STATS_DIR.backup.$(date +%Y%m%d_%H%M%S)" 2>/dev/null || true
+        
+        # GitHubから最新版を取得
+        echo -e "${CYAN}📥 最新版をダウンロード中...${NC}"
+        if command -v curl >/dev/null 2>&1; then
+            if curl -s -o "/tmp/autopush.sh" "https://raw.githubusercontent.com/daideguchi/git-autopush/main/autopush.sh"; then
+                chmod +x "/tmp/autopush.sh"
+                cp "/tmp/autopush.sh" "$install_path"
+                rm "/tmp/autopush.sh"
+                echo -e "${GREEN}✅ 更新完了！${NC}"
+                echo -e "${SPARKLES} 最新版 Git Auto Push Tool がインストールされました${NC}"
+            else
+                echo -e "${RED}❌ ダウンロードに失敗しました${NC}"
+                echo -e "${YELLOW}手動で更新するか、ネットワーク接続を確認してください${NC}"
+            fi
+        else
+            echo -e "${YELLOW}⚠️  curl が見つかりません${NC}"
+            echo -e "${CYAN}手動更新手順:${NC}"
+            echo -e "1. ${TOOL_REPO} にアクセス"
+            echo -e "2. 最新のautopush.sh をダウンロード"
+            echo -e "3. cp autopush.sh $install_path"
+        fi
+    else
+        echo -e "${YELLOW}⚠️  システムワイドインストールが見つかりません${NC}"
+        echo -e "${CYAN}まず以下を実行してください:${NC}"
+        echo -e "${GRAY}   ap --install${NC}"
+    fi
+}
+
+# 自動更新チェック（最新版があるかチェック）
+check_for_updates() {
+    # 1日に1回だけチェック
+    local last_check_file="$STATS_DIR/last_update_check"
+    local today=$(date '+%Y-%m-%d')
+    
+    if [ -f "$last_check_file" ]; then
+        local last_check=$(cat "$last_check_file")
+        if [ "$last_check" = "$today" ]; then
+            return 0
+        fi
+    fi
+    
+    echo "$today" > "$last_check_file"
+    
+    # バックグラウンドで更新チェック（非同期）
+    (
+        if command -v curl >/dev/null 2>&1; then
+            # GitHubから最新のバージョン情報を取得
+            local remote_version=$(curl -s "https://api.github.com/repos/daideguchi/git-autopush/releases/latest" | grep '"tag_name"' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' 2>/dev/null)
+            if [ -n "$remote_version" ] && [ "$remote_version" != "$TOOL_VERSION" ]; then
+                echo -e "${YELLOW}💡 新しいバージョンが利用可能: ${remote_version}${NC}" >&2
+                echo -e "${GRAY}   更新: ap --update${NC}" >&2
+            fi
+        fi
+    ) &
 }
 
 # デスクトップ通知送信
@@ -1217,6 +1367,11 @@ show_git_commands() {
     echo -e "  ${YELLOW}--setup-line${NC}        ${GRAY}# LINE Notify の簡単セットアップ${NC}"
     echo -e "  ${YELLOW}--turn-off-notifications${NC} ${GRAY}# 全通知を無効化（静寂モード）${NC}"
     
+    echo -e "${GEM} ${GREEN}システム管理:${NC}"
+    echo -e "  ${YELLOW}--install${NC}           ${GRAY}# システム全体にインストール${NC}"
+    echo -e "  ${YELLOW}--update${NC}            ${GRAY}# 最新版に自動更新${NC}"
+    echo -e "  ${YELLOW}--version${NC}           ${GRAY}# バージョン情報表示${NC}"
+    
     echo -e "${GRAY}💡 オプション: --info (リポジトリ情報) --stats (ゲーム統計) --help (このヘルプ)${NC}"
     echo ""
 }
@@ -1318,6 +1473,9 @@ execute_visual_features() {
 
 # テーマ適用
 apply_theme
+
+# 自動更新チェック（バックグラウンド実行）
+check_for_updates
 
 # メインロジック開始
 if [ "$GAME_MODE" = true ]; then
