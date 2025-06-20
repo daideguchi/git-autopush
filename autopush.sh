@@ -71,6 +71,11 @@ if [ ! -f "$CONFIG_FILE" ]; then
     echo "profile_update=false" >> "$CONFIG_FILE"
     echo "report_generation=false" >> "$CONFIG_FILE"
     echo "slack_notifications=false" >> "$CONFIG_FILE"
+    echo "discord_notifications=false" >> "$CONFIG_FILE"
+    echo "line_notifications=false" >> "$CONFIG_FILE"
+    echo "teams_notifications=false" >> "$CONFIG_FILE"
+    echo "email_notifications=false" >> "$CONFIG_FILE"
+    echo "theme=default" >> "$CONFIG_FILE"
 fi
 
 # 設定読み込み
@@ -87,6 +92,11 @@ ENABLE_BADGES=${badges_generation:-false}
 ENABLE_PROFILE=${profile_update:-false}
 ENABLE_REPORT=${report_generation:-false}
 ENABLE_SLACK=${slack_notifications:-false}
+ENABLE_DISCORD=${discord_notifications:-false}
+ENABLE_LINE=${line_notifications:-false}
+ENABLE_TEAMS=${teams_notifications:-false}
+ENABLE_EMAIL=${email_notifications:-false}
+THEME=${theme:-default}
 
 # 引数解析
 for arg in "$@"; do
@@ -142,11 +152,46 @@ for arg in "$@"; do
             ENABLE_SLACK=true
             shift
             ;;
+        --notify-discord)
+            ENABLE_DISCORD=true
+            shift
+            ;;
+        --notify-line)
+            ENABLE_LINE=true
+            shift
+            ;;
+        --notify-teams)
+            ENABLE_TEAMS=true
+            shift
+            ;;
+        --notify-email)
+            ENABLE_EMAIL=true
+            shift
+            ;;
+        --setup)
+            run_setup_wizard
+            exit 0
+            ;;
+        --theme)
+            shift
+            if [ -n "$1" ]; then
+                THEME="$1"
+                shift
+            fi
+            ;;
         --enable-all)
             ENABLE_NOTIFICATIONS=true
             ENABLE_BADGES=true
             ENABLE_PROFILE=true
             ENABLE_REPORT=true
+            shift
+            ;;
+        --enable-all-notifications)
+            ENABLE_SLACK=true
+            ENABLE_DISCORD=true
+            ENABLE_LINE=true
+            ENABLE_TEAMS=true
+            ENABLE_EMAIL=true
             shift
             ;;
         *)
@@ -222,6 +267,150 @@ calculate_level() {
     echo $new_level
 }
 
+# ランクタイトル取得
+get_rank_title() {
+    local level=$1
+    case $level in
+        1-4) echo "🌱 Newbie Developer" ;;
+        5-9) echo "🚶 Junior Developer" ;;
+        10-19) echo "⚔️ Code Warrior" ;;
+        20-29) echo "🥋 Push Master" ;;
+        30-49) echo "🥷 Code Ninja" ;;
+        50-74) echo "👑 Elite Developer" ;;
+        75-99) echo "💎 Legendary Coder" ;;
+        *) echo "🦄 Mythical Developer" ;;
+    esac
+}
+
+# インタラクティブなセットアップウィザード
+run_setup_wizard() {
+    clear
+    echo -e "${GOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GOLD}🚀✨ Git Auto Push セットアップウィザード ✨🚀${NC}"
+    echo -e "${GOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${CYAN}このウィザードがあなたの最適な設定を作成します！${NC}"
+    echo ""
+    
+    # ゲームモード設定
+    echo -e "${GAME}${GREEN} 1. ゲーム機能を使用しますか？ (推奨: y)${NC}"
+    echo -e "   ${GRAY}レベル、XP、ストリーク、バッジなどのゲーム要素${NC}"
+    read -p "   [y/n]: " game_choice
+    case $game_choice in
+        [Nn]*) game_mode="false" ;;
+        *) game_mode="true" ;;
+    esac
+    
+    # 通知設定
+    echo ""
+    echo -e "${BELL}${GREEN} 2. デスクトップ通知を有効にしますか？ (推奨: y)${NC}"
+    read -p "   [y/n]: " notification_choice
+    case $notification_choice in
+        [Nn]*) notifications="false" ;;
+        *) notifications="true" ;;
+    esac
+    
+    # 視覚機能設定
+    echo ""
+    echo -e "${CAMERA}${GREEN} 3. 視覚的機能を設定してください:${NC}"
+    echo -e "   ${SPARKLES} SVGバッジ生成 (GitHub READMEに使用可能)"
+    read -p "   有効にしますか？ [y/n]: " badges_choice
+    case $badges_choice in
+        [Yy]*) badges_generation="true" ;;
+        *) badges_generation="false" ;;
+    esac
+    
+    echo -e "   ${GLOBE} GitHub Profile README生成"
+    read -p "   有効にしますか？ [y/n]: " profile_choice
+    case $profile_choice in
+        [Yy]*) profile_update="true" ;;
+        *) profile_update="false" ;;
+    esac
+    
+    echo -e "   ${CHART} HTML統計レポート生成"
+    read -p "   有効にしますか？ [y/n]: " report_choice
+    case $report_choice in
+        [Yy]*) report_generation="true" ;;
+        *) report_generation="false" ;;
+    esac
+    
+    # 外部通知設定
+    echo ""
+    echo -e "${LIGHTNING}${GREEN} 4. 外部通知サービス設定:${NC}"
+    
+    echo -e "   📢 Slack通知"
+    read -p "   使用しますか？ [y/n]: " slack_choice
+    case $slack_choice in
+        [Yy]*)
+            slack_notifications="true"
+            echo -e "   ${GRAY}環境変数 SLACK_WEBHOOK_URL を設定してください${NC}"
+            read -p "   Webhook URL (オプション): " slack_url
+            if [ -n "$slack_url" ]; then
+                echo "export SLACK_WEBHOOK_URL=\"$slack_url\"" >> ~/.bashrc
+                echo "export SLACK_WEBHOOK_URL=\"$slack_url\"" >> ~/.zshrc
+            fi
+            ;;
+        *) slack_notifications="false" ;;
+    esac
+    
+    echo -e "   💬 Discord通知"
+    read -p "   使用しますか？ [y/n]: " discord_choice
+    case $discord_choice in
+        [Yy]*)
+            discord_notifications="true"
+            echo -e "   ${GRAY}環境変数 DISCORD_WEBHOOK_URL を設定してください${NC}"
+            ;;
+        *) discord_notifications="false" ;;
+    esac
+    
+    echo -e "   💚 LINE Notify"
+    read -p "   使用しますか？ [y/n]: " line_choice
+    case $line_choice in
+        [Yy]*)
+            line_notifications="true"
+            echo -e "   ${GRAY}環境変数 LINE_NOTIFY_TOKEN を設定してください${NC}"
+            ;;
+        *) line_notifications="false" ;;
+    esac
+    
+    # テーマ設定
+    echo ""
+    echo -e "${STAR}${GREEN} 5. 表示テーマを選択してください:${NC}"
+    echo -e "   1) ${GREEN}default${NC} - 標準テーマ"
+    echo -e "   2) ${PURPLE}cyberpunk${NC} - サイバーパンクテーマ"
+    echo -e "   3) ${BLUE}ocean${NC} - オーシャンテーマ"
+    echo -e "   4) ${GOLD}retro${NC} - レトロテーマ"
+    read -p "   [1-4]: " theme_choice
+    case $theme_choice in
+        2) theme="cyberpunk" ;;
+        3) theme="ocean" ;;
+        4) theme="retro" ;;
+        *) theme="default" ;;
+    esac
+    
+    # 設定保存
+    cat > "$CONFIG_FILE" << EOF
+game_mode=$game_mode
+notifications=$notifications
+badges_generation=$badges_generation
+profile_update=$profile_update
+report_generation=$report_generation
+slack_notifications=$slack_notifications
+discord_notifications=$discord_notifications
+line_notifications=$line_notifications
+teams_notifications=false
+email_notifications=false
+theme=$theme
+EOF
+    
+    echo ""
+    echo -e "${GREEN}✅ 設定が完了しました！${NC}"
+    echo -e "${CYAN}設定ファイル: ${CONFIG_FILE}${NC}"
+    echo ""
+    echo -e "${GOLD}🎉 Git Auto Push の使用を開始できます！${NC}"
+    echo -e "${GRAY}使用例: ap \"コミットメッセージ\"${NC}"
+}
+
 # デスクトップ通知送信
 send_notification() {
     local title="$1"
@@ -273,31 +462,95 @@ EOF
     fi
 }
 
-# GitHub Profile README用Markdown生成
+# GitHub Profile README用Markdown生成（スタイリッシュ版）
 generate_profile_markdown() {
     if [ "$ENABLE_PROFILE" = true ]; then
         load_stats
         load_streak
         
         local profile_file="$STATS_DIR/profile-stats.md"
+        local xp_percent=$(((xp % 100)))
+        local next_level_xp=$((level * 100))
+        
         cat > "$profile_file" << EOF
-## 🚀 Git Auto Push Stats
+<div align="center">
 
-![Level](https://img.shields.io/badge/Level-${level}-gold?style=flat-square&logo=star)
-![XP](https://img.shields.io/badge/XP-${xp}-blue?style=flat-square&logo=lightning)
-![Streak](https://img.shields.io/badge/Streak-${current_streak}days-red?style=flat-square&logo=fire)
-![Total Pushes](https://img.shields.io/badge/Pushes-${total_pushes}-green?style=flat-square&logo=git)
+# 🚀 Git Auto Push Developer Dashboard
 
-### 🏆 Recent Achievements
+<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&pause=1000&color=36BCF7&center=true&vCenter=true&width=600&lines=Level+${level}+Developer+%F0%9F%9A%80;${xp}+XP+Earned+%E2%9A%A1;${current_streak}+Day+Streak+%F0%9F%94%A5;${total_pushes}+Commits+Pushed+%F0%9F%93%A6" alt="Typing SVG" />
+
+</div>
+
+## 📊 Development Stats
+
+<table>
+<tr>
+<td width="50%">
+
+### 🎯 Current Status
+![Level](https://img.shields.io/badge/Level-${level}-gold?style=for-the-badge&logo=star&logoColor=white)
+![XP](https://img.shields.io/badge/XP-${xp}-blue?style=for-the-badge&logo=lightning&logoColor=white)
+![Streak](https://img.shields.io/badge/Streak-${current_streak}days-red?style=for-the-badge&logo=fire&logoColor=white)
+![Pushes](https://img.shields.io/badge/Pushes-${total_pushes}-green?style=for-the-badge&logo=git&logoColor=white)
+
+### 📈 Progress to Next Level
+\`\`\`
+Level ${level} [${'█'.repeat(xp_percent/5)}${'░'.repeat(20-xp_percent/5)}] ${xp_percent}%
+${xp}/${next_level_xp} XP
+\`\`\`
+
+</td>
+<td width="50%">
+
+### 🏆 Achievement Gallery
 EOF
         
         if [ -f "$BADGES_FILE" ] && [ -s "$BADGES_FILE" ]; then
             while IFS='|' read -r name emoji desc; do
-                echo "- $emoji **$name**: $desc" >> "$profile_file"
+                echo "<img src=\"https://img.shields.io/badge/${name}-${desc}-purple?style=flat-square&logo=trophy&logoColor=white\" alt=\"$name\" title=\"$emoji $desc\" />" >> "$profile_file"
             done < "$BADGES_FILE"
         fi
         
-        echo -e "${GLOBE} Profile Markdown生成: ${profile_file}"
+        cat >> "$profile_file" << EOF
+
+### 🌟 Recent Activity
+- 🚀 **Latest Push**: $(date '+%Y-%m-%d %H:%M')
+- 🔥 **Current Streak**: ${current_streak} days
+- 🎯 **XP This Session**: +50 XP
+- 🏆 **Rank**: $(get_rank_title $level)
+
+</td>
+</tr>
+</table>
+
+<div align="center">
+
+### 🎮 Gaming Stats Visualization
+
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=YourUsername&show_icons=true&theme=radical&hide_border=true&bg_color=0D1117&title_color=F85D7F&icon_color=F8D866&text_color=A8B2D1)
+
+### 🏅 Achievement Timeline
+\`\`\`mermaid
+timeline
+    title Development Journey
+    section Level 1
+        First Push 🌱 : Initial commit
+    section Level 2  
+        Consistent Dev 🚶 : 10 commits
+    section Level 3
+        Code Warrior ⚔️ : 50 commits
+        Current Level 🎯 : Level ${level}
+\`\`\`
+
+</div>
+
+---
+<div align="center">
+<i>🚀 Powered by Git Auto Push Tool | Last Updated: $(date '+%Y-%m-%d %H:%M:%S')</i>
+</div>
+EOF
+        
+        echo -e "${GLOBE} スタイリッシュProfile Markdown生成: ${profile_file}"
     fi
 }
 
@@ -389,16 +642,257 @@ EOF
     fi
 }
 
-# Slack通知送信
+# 外部通知システム（拡張版）
 send_slack_notification() {
     local webhook_url="$SLACK_WEBHOOK_URL"
     local message="$1"
     
     if [ "$ENABLE_SLACK" = true ] && [ -n "$webhook_url" ]; then
+        local payload=$(cat << EOF
+{
+    "text": "$message",
+    "attachments": [
+        {
+            "color": "good",
+            "fields": [
+                {
+                    "title": "Level",
+                    "value": "$level",
+                    "short": true
+                },
+                {
+                    "title": "XP",
+                    "value": "$xp",
+                    "short": true
+                },
+                {
+                    "title": "Streak",
+                    "value": "${current_streak} days",
+                    "short": true
+                },
+                {
+                    "title": "Total Pushes",
+                    "value": "$total_pushes",
+                    "short": true
+                }
+            ]
+        }
+    ]
+}
+EOF
+)
         curl -X POST -H 'Content-type: application/json' \
-            --data "{\"text\":\"$message\"}" \
+            --data "$payload" \
             "$webhook_url" 2>/dev/null
     fi
+}
+
+# Discord通知送信
+send_discord_notification() {
+    local webhook_url="$DISCORD_WEBHOOK_URL"
+    local message="$1"
+    local color="$2"
+    
+    if [ "$ENABLE_DISCORD" = true ] && [ -n "$webhook_url" ]; then
+        local payload=$(cat << EOF
+{
+    "embeds": [
+        {
+            "title": "🚀 Git Auto Push",
+            "description": "$message",
+            "color": ${color:-3447003},
+            "fields": [
+                {
+                    "name": "📊 Stats",
+                    "value": "Level: $level | XP: $xp | Streak: ${current_streak}d | Pushes: $total_pushes",
+                    "inline": false
+                }
+            ],
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+        }
+    ]
+}
+EOF
+)
+        curl -X POST -H 'Content-type: application/json' \
+            --data "$payload" \
+            "$webhook_url" 2>/dev/null
+    fi
+}
+
+# LINE Notify通知送信
+send_line_notification() {
+    local token="$LINE_NOTIFY_TOKEN"
+    local message="$1"
+    
+    if [ "$ENABLE_LINE" = true ] && [ -n "$token" ]; then
+        curl -X POST -H "Authorization: Bearer $token" \
+            -F "message=$message 📊 Lv.$level | $xp XP | ${current_streak}d | $total_pushes pushes" \
+            https://notify-api.line.me/api/notify 2>/dev/null
+    fi
+}
+
+# Microsoft Teams通知送信
+send_teams_notification() {
+    local webhook_url="$TEAMS_WEBHOOK_URL"
+    local message="$1"
+    
+    if [ "$ENABLE_TEAMS" = true ] && [ -n "$webhook_url" ]; then
+        local payload=$(cat << EOF
+{
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "0076D7",
+    "summary": "Git Auto Push Update",
+    "sections": [{
+        "activityTitle": "🚀 Git Auto Push",
+        "activitySubtitle": "$message",
+        "facts": [{
+            "name": "Level:",
+            "value": "$level"
+        }, {
+            "name": "XP:",
+            "value": "$xp"
+        }, {
+            "name": "Streak:",
+            "value": "${current_streak} days"
+        }, {
+            "name": "Total Pushes:",
+            "value": "$total_pushes"
+        }],
+        "markdown": true
+    }]
+}
+EOF
+)
+        curl -X POST -H 'Content-type: application/json' \
+            --data "$payload" \
+            "$webhook_url" 2>/dev/null
+    fi
+}
+
+# Email通知送信
+send_email_notification() {
+    local email="$EMAIL_ADDRESS"
+    local subject="$1"
+    local message="$2"
+    
+    if [ "$ENABLE_EMAIL" = true ] && [ -n "$email" ]; then
+        if command -v mail >/dev/null 2>&1; then
+            echo "$message" | mail -s "$subject" "$email"
+        elif command -v sendmail >/dev/null 2>&1; then
+            (
+                echo "To: $email"
+                echo "Subject: $subject"
+                echo ""
+                echo "$message"
+            ) | sendmail "$email"
+        fi
+    fi
+}
+
+# 統合通知システム
+send_all_notifications() {
+    local title="$1"
+    local message="$2"
+    local color="${3:-3066993}"
+    
+    # デスクトップ通知
+    if [ "$ENABLE_NOTIFICATIONS" = true ]; then
+        send_notification "$title" "$message"
+    fi
+    
+    # 外部サービス通知
+    if [ "$ENABLE_SLACK" = true ]; then
+        send_slack_notification "$title: $message"
+    fi
+    
+    if [ "$ENABLE_DISCORD" = true ]; then
+        send_discord_notification "$message" "$color"
+    fi
+    
+    if [ "$ENABLE_LINE" = true ]; then
+        send_line_notification "$title: $message"
+    fi
+    
+    if [ "$ENABLE_TEAMS" = true ]; then
+        send_teams_notification "$message"
+    fi
+    
+    if [ "$ENABLE_EMAIL" = true ]; then
+        send_email_notification "$title" "$message"
+    fi
+}
+
+# テーマ適用システム
+apply_theme() {
+    case $THEME in
+        "cyberpunk")
+            RED='\033[0;91m'
+            GREEN='\033[0;92m'
+            YELLOW='\033[1;93m'
+            BLUE='\033[0;94m'
+            PURPLE='\033[0;95m'
+            CYAN='\033[0;96m'
+            MAGENTA='\033[1;95m'
+            GOLD='\033[1;93m'
+            WHITE='\033[1;97m'
+            ;;
+        "ocean")
+            RED='\033[0;36m'
+            GREEN='\033[0;32m'
+            YELLOW='\033[1;96m'
+            BLUE='\033[0;34m'
+            PURPLE='\033[0;94m'
+            CYAN='\033[0;36m'
+            MAGENTA='\033[0;96m'
+            GOLD='\033[1;96m'
+            WHITE='\033[1;97m'
+            ;;
+        "retro")
+            RED='\033[0;33m'
+            GREEN='\033[0;32m'
+            YELLOW='\033[1;33m'
+            BLUE='\033[0;36m'
+            PURPLE='\033[0;35m'
+            CYAN='\033[0;36m'
+            MAGENTA='\033[1;35m'
+            GOLD='\033[1;33m'
+            WHITE='\033[1;37m'
+            ;;
+        # default theme (no changes needed)
+    esac
+}
+
+# 進捗表示アニメーション
+show_progress_animation() {
+    local message="$1"
+    local duration="${2:-3}"
+    
+    echo -ne "$message "
+    for i in $(seq 1 $duration); do
+        echo -ne "⠋"
+        sleep 0.1
+        echo -ne "\b⠙"
+        sleep 0.1
+        echo -ne "\b⠹"
+        sleep 0.1
+        echo -ne "\b⠸"
+        sleep 0.1
+        echo -ne "\b⠼"
+        sleep 0.1
+        echo -ne "\b⠴"
+        sleep 0.1
+        echo -ne "\b⠦"
+        sleep 0.1
+        echo -ne "\b⠧"
+        sleep 0.1
+        echo -ne "\b⠇"
+        sleep 0.1
+        echo -ne "\b⠏"
+        sleep 0.1
+    done
+    echo -e "\b✅"
 }
 
 # コンパクトなリポジトリ情報表示
@@ -491,11 +985,8 @@ add_badge() {
             echo -e "${CYAN}「${badge_desc}」${NC}"
             echo ""
             
-            # 通知送信
-            send_notification "🏆 新バッジ獲得!" "$badge_emoji $badge_name: $badge_desc"
-            
-            # Slack通知
-            send_slack_notification "🏆 *新バッジ獲得!* $badge_emoji *$badge_name*: $badge_desc"
+            # 通知統合送信
+            send_all_notifications "🏆 新バッジ獲得!" "$badge_emoji $badge_name: $badge_desc" "15844367"
         fi
     fi
 }
@@ -555,11 +1046,8 @@ show_levelup_effect() {
     echo -e "${MAGENTA}${SPARKLES} レベル $level に到達しました！ ${SPARKLES}${NC}"
     echo ""
     
-    # レベルアップ通知
-    send_notification "🎉 レベルアップ!" "おめでとうございます！レベル $level に到達しました！" "Sosumi"
-    
-    # Slack通知
-    send_slack_notification "🎉 *レベルアップ!* おめでとうございます！レベル *$level* に到達しました！"
+    # 通知統合送信
+    send_all_notifications "🎉 レベルアップ!" "おめでとうございます！レベル $level に到達しました！" "3447003"
 }
 
 # Gitコマンドクイックリファレンス表示
@@ -598,6 +1086,18 @@ show_git_commands() {
     echo -e "  ${YELLOW}--profile${NC}           ${GRAY}# GitHub Profile用Markdown生成${NC}"
     echo -e "  ${YELLOW}--report${NC}            ${GRAY}# HTML統計レポート生成${NC}"
     echo -e "  ${YELLOW}--enable-all${NC}        ${GRAY}# 全視覚的機能有効${NC}"
+    
+    echo -e "${LIGHTNING} ${GREEN}外部通知サービス:${NC}"
+    echo -e "  ${YELLOW}--notify-slack${NC}      ${GRAY}# Slack Webhook通知${NC}"
+    echo -e "  ${YELLOW}--notify-discord${NC}    ${GRAY}# Discord Webhook通知${NC}"
+    echo -e "  ${YELLOW}--notify-line${NC}       ${GRAY}# LINE Notify通知${NC}"
+    echo -e "  ${YELLOW}--notify-teams${NC}      ${GRAY}# Microsoft Teams通知${NC}"
+    echo -e "  ${YELLOW}--notify-email${NC}      ${GRAY}# Email通知${NC}"
+    echo -e "  ${YELLOW}--enable-all-notifications${NC} ${GRAY}# 全通知サービス有効${NC}"
+    
+    echo -e "${STAR} ${GREEN}テーマ・設定:${NC}"
+    echo -e "  ${YELLOW}--theme <name>${NC}      ${GRAY}# テーマ選択 (default/cyberpunk/ocean/retro)${NC}"
+    echo -e "  ${YELLOW}--setup${NC}             ${GRAY}# インタラクティブ設定ウィザード${NC}"
     
     echo -e "${GRAY}💡 オプション: --info (リポジトリ情報) --stats (ゲーム統計) --help (このヘルプ)${NC}"
     echo ""
@@ -698,9 +1198,19 @@ execute_visual_features() {
     fi
 }
 
+# テーマ適用
+apply_theme
+
 # メインロジック開始
 if [ "$GAME_MODE" = true ]; then
-    echo -e "${CYAN}${GAME} Git Auto Push Tool${NC}"
+    case $THEME in
+        "cyberpunk") echo -e "${MAGENTA}▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄${NC}"
+                 echo -e "${CYAN}██${NC} ${GOLD}🚀 CYBER GIT AUTO PUSH ${GAME}${NC} ${CYAN}██${NC}"
+                 echo -e "${MAGENTA}▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀${NC}" ;;
+        "ocean") echo -e "${BLUE}🌊 ${CYAN}Oceanic Git Auto Push Tool ${GAME}${NC} ${BLUE}🌊${NC}" ;;
+        "retro") echo -e "${YELLOW}░▒▓█ ${CYAN}RETRO GIT AUTO PUSH ${GAME}${NC} ${YELLOW}█▓▒░${NC}" ;;
+        *) echo -e "${CYAN}${GAME} Git Auto Push Tool${NC}" ;;
+    esac
 else
     echo -e "${CYAN}${ROCKET} Git Auto Push Tool${NC}"
 fi
@@ -773,12 +1283,12 @@ echo -e "${PACKAGE} ${CYAN}コミットメッセージ:${NC} ${COMMIT_MSG}"
 echo ""
 
 # 全ての変更をステージング
-echo -e "${BLUE}${INFO} 変更をステージング中...${NC}"
+show_progress_animation "🔄 変更をステージング中" 2
 git add -A
 
 # コミット
-echo -e "${BLUE}${INFO} コミット中...${NC}"
-if git commit -m "$COMMIT_MSG"; then
+show_progress_animation "📝 コミット中" 2
+if git commit -m "$COMMIT_MSG" >/dev/null 2>&1; then
     echo -e "${GREEN}${CHECK} コミット完了${NC}"
 else
     echo -e "${RED}${WARNING} コミットに失敗しました${NC}"
@@ -786,8 +1296,8 @@ else
 fi
 
 # プッシュ
-echo -e "${BLUE}${INFO} リモートリポジトリにプッシュ中...${NC}"
-if git push; then
+show_progress_animation "🚀 リモートリポジトリにプッシュ中" 3
+if git push >/dev/null 2>&1; then
     echo ""
     echo -e "${GREEN}${CHECK}${CHECK}${CHECK} 自動プッシュ完了！${CHECK}${CHECK}${CHECK}${NC}"
     echo -e "${PURPLE}Repository: $(git remote get-url origin)${NC}"
@@ -836,8 +1346,8 @@ if git push; then
         echo -e "${SPARKLES} ${MAGENTA}$(get_encouragement)${NC}"
         echo -e "${PARTY} ${GOLD}+50 XP獲得！${NC}"
         
-        # 基本通知
-        send_notification "🚀 Git Push 完了!" "$(get_encouragement) (+50 XP)"
+        # 通知統合送信
+        send_all_notifications "🚀 Git Push 完了!" "$(get_encouragement) (+50 XP)" "3066993"
         
         # ストリーク表示
         load_streak
