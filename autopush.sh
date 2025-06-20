@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # 🚀 Git Auto Push - 汎用自動プッシュツール with ゲーム要素！
-# 使用方法: ./autopush.sh [カスタムメッセージ] [--no-game|--quit-game]
-# エイリアス: ap [カスタムメッセージ] [--no-game|--quit-game]
-# デフォルト: ゲーム機能 ON
+# 使用方法: ./autopush.sh [カスタムメッセージ] [オプション]
+# エイリアス: ap [カスタムメッセージ] [オプション]
+# オプション: --info, --stats, --help, --game, --no-game, --quit-game
 
 # カラー定義
 RED='\033[0;31m'
@@ -68,6 +68,9 @@ source "$CONFIG_FILE"
 # ゲームモードフラグ（設定ファイルから読み込み）
 GAME_MODE=$game_mode
 CUSTOM_MSG=""
+SHOW_INFO=false
+SHOW_STATS=false
+SHOW_HELP=false
 
 # 引数解析
 for arg in "$@"; do
@@ -85,6 +88,18 @@ for arg in "$@"; do
             echo -e "${YELLOW}${INFO} ゲームモードを永続的に無効化しました${NC}"
             echo -e "${GRAY}再有効化するには --game フラグを使用してください${NC}"
             GAME_MODE=false
+            shift
+            ;;
+        --info)
+            SHOW_INFO=true
+            shift
+            ;;
+        --stats)
+            SHOW_STATS=true
+            shift
+            ;;
+        --help|--commands)
+            SHOW_HELP=true
             shift
             ;;
         *)
@@ -160,6 +175,16 @@ calculate_level() {
     echo $new_level
 }
 
+# コンパクトなリポジトリ情報表示
+show_compact_info() {
+    local current_branch=$(git branch --show-current 2>/dev/null)
+    local remote_url=$(git remote get-url origin 2>/dev/null)
+    
+    if [ -n "$current_branch" ]; then
+        echo -e "${BRANCH}${current_branch} ${GLOBE}$(basename "$remote_url" .git) ${GRAY}(--info で詳細)${NC}"
+    fi
+}
+
 # リポジトリ情報表示関数
 show_repo_info() {
     echo -e "${GLOBE}${CYAN} === リポジトリ情報 === ${NC}"
@@ -216,6 +241,15 @@ show_repo_info() {
     fi
     
     echo ""
+}
+
+# コンパクトゲーム統計
+show_compact_game_stats() {
+    if [ "$GAME_MODE" = true ]; then
+        load_stats
+        load_streak
+        echo -e "${GAME}Lv.$level ${LIGHTNING}$xp XP ${FIRE}$current_streak日 ${ROCKET}$total_pushes回 ${GRAY}(--stats で詳細)${NC}"
+    fi
 }
 
 # バッジ追加関数
@@ -319,6 +353,8 @@ show_git_commands() {
     echo -e "  ${YELLOW}git pull${NC}            ${GRAY}# リモートから最新を取得${NC}"
     echo -e "  ${YELLOW}git fetch${NC}           ${GRAY}# リモート情報を取得（マージしない）${NC}"
     echo -e "  ${YELLOW}git remote -v${NC}       ${GRAY}# リモートリポジトリ一覧${NC}"
+    
+    echo -e "${GRAY}💡 オプション: --info (リポジトリ情報) --stats (ゲーム統計) --help (このヘルプ)${NC}"
     echo ""
 }
 
@@ -397,24 +433,36 @@ check_badges() {
 
 # メインロジック開始
 if [ "$GAME_MODE" = true ]; then
-    echo -e "${CYAN}${GAME} Git Auto Push Tool - ゲームモード ${GAME}${NC}"
+    echo -e "${CYAN}${GAME} Git Auto Push Tool${NC}"
 else
     echo -e "${CYAN}${ROCKET} Git Auto Push Tool${NC}"
 fi
-echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-# リポジトリ情報表示（常に表示）
-show_repo_info
-echo -e "${GRAY}─────────────────────────────────────────────────────────────────────────────${NC}"
+# コンパクト表示（基本情報のみ）
+show_compact_info
+show_compact_game_stats
 
-# ゲームモードの場合、統計表示
-if [ "$GAME_MODE" = true ]; then
-    show_game_stats
+# オプション指定時の詳細表示
+if [ "$SHOW_INFO" = true ]; then
     echo -e "${GRAY}─────────────────────────────────────────────────────────────────────────────${NC}"
+    show_repo_info
 fi
 
-# Gitコマンドクイックリファレンス表示（常に表示）
-show_git_commands
+if [ "$SHOW_STATS" = true ] && [ "$GAME_MODE" = true ]; then
+    echo -e "${GRAY}─────────────────────────────────────────────────────────────────────────────${NC}"
+    show_game_stats
+fi
+
+if [ "$SHOW_HELP" = true ]; then
+    echo -e "${GRAY}─────────────────────────────────────────────────────────────────────────────${NC}"
+    show_git_commands
+fi
+
+# 情報表示のみの場合は終了
+if [ "$SHOW_INFO" = true ] || [ "$SHOW_STATS" = true ] || [ "$SHOW_HELP" = true ]; then
+    exit 0
+fi
+
 echo -e "${GRAY}─────────────────────────────────────────────────────────────────────────────${NC}"
 
 # Git リポジトリかチェック
