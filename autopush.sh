@@ -319,10 +319,12 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 # ゲームモードの場合、統計表示
 if [ "$GAME_MODE" = true ]; then
     show_game_stats
+    echo -e "${GRAY}─────────────────────────────────────────────────────────────────────────────${NC}"
 fi
 
 # Gitコマンドクイックリファレンス表示（常に表示）
 show_git_commands
+echo -e "${GRAY}─────────────────────────────────────────────────────────────────────────────${NC}"
 
 # Git リポジトリかチェック
 if [ ! -d ".git" ]; then
@@ -344,6 +346,8 @@ if ! git remote get-url origin &>/dev/null; then
     exit 1
 fi
 
+echo -e "${BLUE}${ROCKET} === Git Push 開始 ===${NC}"
+
 # 変更されたファイルを表示
 echo -e "${BLUE}${INFO} 変更されたファイル:${NC}"
 git status --porcelain | while read line; do
@@ -360,6 +364,7 @@ else
 fi
 
 echo -e "${PACKAGE} ${CYAN}コミットメッセージ:${NC} ${COMMIT_MSG}"
+echo ""
 
 # 全ての変更をステージング
 echo -e "${BLUE}${INFO} 変更をステージング中...${NC}"
@@ -386,6 +391,9 @@ if git push; then
     # ゲームモードの場合、統計更新と励ましメッセージ
     if [ "$GAME_MODE" = true ]; then
         echo ""
+        echo -e "${GOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${GOLD}${SPARKLES} === ゲーム結果 === ${SPARKLES}${NC}"
+        echo -e "${GOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         
         # 統計読み込み
         load_stats
@@ -426,6 +434,7 @@ if git push; then
         fi
         
         echo ""
+        echo -e "${GOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     fi
 else
     echo -e "${RED}${WARNING} プッシュに失敗しました${NC}"
