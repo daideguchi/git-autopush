@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 🚀 Git Auto Push - 汎用自動プッシュツール with ゲーム要素！
-# 使用方法: ./autopush.sh [カスタムメッセージ] [--no-game]
-# エイリアス: ap [カスタムメッセージ] [--no-game]
+# 使用方法: ./autopush.sh [カスタムメッセージ] [--no-game|--quit-game]
+# エイリアス: ap [カスタムメッセージ] [--no-game|--quit-game]
 # デフォルト: ゲーム機能 ON
 
 # カラー定義
@@ -15,6 +15,7 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;95m'
 GOLD='\033[1;33m'
 GRAY='\033[0;90m'
+WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
 # 絵文字定義
@@ -41,9 +42,31 @@ MERGE="🔀"
 RESET="🔄"
 TAG="🏷️"
 STASH="📋"
+GLOBE="🌐"
+FOLDER="📁"
+CLOCK="🕐"
+USER="👤"
 
-# ゲームモードフラグ（デフォルトON）
-GAME_MODE=true
+# データディレクトリとファイル
+STATS_DIR="$HOME/.autopush"
+STATS_FILE="$STATS_DIR/stats.txt"
+BADGES_FILE="$STATS_DIR/badges.txt"
+STREAK_FILE="$STATS_DIR/streak.txt"
+CONFIG_FILE="$STATS_DIR/config.txt"
+
+# データディレクトリを作成
+mkdir -p "$STATS_DIR"
+
+# 設定ファイルが存在しない場合は初期化（デフォルト：ゲームモードON）
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "game_mode=true" > "$CONFIG_FILE"
+fi
+
+# 設定読み込み
+source "$CONFIG_FILE"
+
+# ゲームモードフラグ（設定ファイルから読み込み）
+GAME_MODE=$game_mode
 CUSTOM_MSG=""
 
 # 引数解析
@@ -57,6 +80,13 @@ for arg in "$@"; do
             GAME_MODE=true
             shift
             ;;
+        --quit-game)
+            echo "game_mode=false" > "$CONFIG_FILE"
+            echo -e "${YELLOW}${INFO} ゲームモードを永続的に無効化しました${NC}"
+            echo -e "${GRAY}再有効化するには --game フラグを使用してください${NC}"
+            GAME_MODE=false
+            shift
+            ;;
         *)
             if [ -z "$CUSTOM_MSG" ]; then
                 CUSTOM_MSG="$arg"
@@ -65,14 +95,10 @@ for arg in "$@"; do
     esac
 done
 
-# データディレクトリとファイル
-STATS_DIR="$HOME/.autopush"
-STATS_FILE="$STATS_DIR/stats.txt"
-BADGES_FILE="$STATS_DIR/badges.txt"
-STREAK_FILE="$STATS_DIR/streak.txt"
-
-# データディレクトリを作成
-mkdir -p "$STATS_DIR"
+# ゲームモードが有効になった場合は設定を保存
+if [ "$GAME_MODE" = true ] && [ "$game_mode" != "true" ]; then
+    echo "game_mode=true" > "$CONFIG_FILE"
+fi
 
 # 統計ファイルが存在しない場合は初期化
 if [ ! -f "$STATS_FILE" ]; then
@@ -132,6 +158,64 @@ calculate_level() {
     done
     
     echo $new_level
+}
+
+# リポジトリ情報表示関数
+show_repo_info() {
+    echo -e "${GLOBE}${CYAN} === リポジトリ情報 === ${NC}"
+    
+    # 現在のブランチ
+    local current_branch=$(git branch --show-current 2>/dev/null)
+    if [ -n "$current_branch" ]; then
+        echo -e "${BRANCH} ブランチ: ${GREEN}$current_branch${NC}"
+    fi
+    
+    # リモートリポジトリ
+    local remote_url=$(git remote get-url origin 2>/dev/null)
+    if [ -n "$remote_url" ]; then
+        echo -e "${GLOBE} リモート: ${BLUE}$remote_url${NC}"
+    fi
+    
+    # 最新コミット情報
+    local latest_commit=$(git log --oneline -1 2>/dev/null)
+    if [ -n "$latest_commit" ]; then
+        echo -e "${PACKAGE} 最新コミット: ${PURPLE}$latest_commit${NC}"
+    fi
+    
+    # リモートとの同期状態
+    git fetch --dry-run &>/dev/null
+    local ahead=$(git rev-list --count HEAD..@{u} 2>/dev/null || echo "0")
+    local behind=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo "0")
+    
+    if [ "$ahead" -gt 0 ] && [ "$behind" -gt 0 ]; then
+        echo -e "${WARNING} 同期状態: ${YELLOW}$behind件進んでいて、$ahead件遅れています${NC}"
+    elif [ "$ahead" -gt 0 ]; then
+        echo -e "${INFO} 同期状態: ${YELLOW}リモートより$ahead件遅れています${NC}"
+    elif [ "$behind" -gt 0 ]; then
+        echo -e "${ROCKET} 同期状態: ${GREEN}リモートより$behind件進んでいます${NC}"
+    else
+        echo -e "${CHECK} 同期状態: ${GREEN}リモートと同期済み${NC}"
+    fi
+    
+    # 作業ディレクトリの状態
+    local staged=$(git diff --cached --name-only | wc -l | tr -d ' ')
+    local unstaged=$(git diff --name-only | wc -l | tr -d ' ')
+    local untracked=$(git ls-files --others --exclude-standard | wc -l | tr -d ' ')
+    
+    if [ "$staged" -gt 0 ] || [ "$unstaged" -gt 0 ] || [ "$untracked" -gt 0 ]; then
+        echo -e "${FOLDER} 作業状態: ${YELLOW}ステージ済み:$staged件 未ステージ:$unstaged件 未追跡:$untracked件${NC}"
+    else
+        echo -e "${FOLDER} 作業状態: ${GREEN}クリーン${NC}"
+    fi
+    
+    # ユーザー情報
+    local git_user=$(git config user.name 2>/dev/null)
+    local git_email=$(git config user.email 2>/dev/null)
+    if [ -n "$git_user" ]; then
+        echo -e "${USER} ユーザー: ${WHITE}$git_user${NC} ${GRAY}<$git_email>${NC}"
+    fi
+    
+    echo ""
 }
 
 # バッジ追加関数
@@ -272,6 +356,9 @@ show_game_stats() {
             echo -e "  ${emoji} ${name}"
         done < "$BADGES_FILE"
     fi
+    
+    # ゲームモード終了のヒント
+    echo -e "${GRAY}💡 ヒント: ${YELLOW}--quit-game${GRAY} フラグでゲームモードを永続的に無効化できます${NC}"
     echo ""
 }
 
@@ -315,6 +402,10 @@ else
     echo -e "${CYAN}${ROCKET} Git Auto Push Tool${NC}"
 fi
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+# リポジトリ情報表示（常に表示）
+show_repo_info
+echo -e "${GRAY}─────────────────────────────────────────────────────────────────────────────${NC}"
 
 # ゲームモードの場合、統計表示
 if [ "$GAME_MODE" = true ]; then
