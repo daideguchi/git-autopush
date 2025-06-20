@@ -63,10 +63,10 @@ REPORTS_DIR="$STATS_DIR/reports"
 # データディレクトリを作成
 mkdir -p "$STATS_DIR" "$BADGES_DIR" "$REPORTS_DIR"
 
-# 設定ファイルが存在しない場合は初期化（デフォルト：ゲームモードON、通知ON）
+# 設定ファイルが存在しない場合は初期化（デフォルト：ゲームモードON、通知OFF）
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "game_mode=true" > "$CONFIG_FILE"
-    echo "notifications=true" >> "$CONFIG_FILE"
+    echo "notifications=false" >> "$CONFIG_FILE"
     echo "badges_generation=false" >> "$CONFIG_FILE"
     echo "profile_update=false" >> "$CONFIG_FILE"
     echo "report_generation=false" >> "$CONFIG_FILE"
@@ -87,7 +87,7 @@ CUSTOM_MSG=""
 SHOW_INFO=false
 SHOW_STATS=false
 SHOW_HELP=false
-ENABLE_NOTIFICATIONS=${notifications:-true}
+ENABLE_NOTIFICATIONS=${notifications:-false}
 ENABLE_BADGES=${badges_generation:-false}
 ENABLE_PROFILE=${profile_update:-false}
 ENABLE_REPORT=${report_generation:-false}
@@ -170,6 +170,22 @@ for arg in "$@"; do
             ;;
         --setup)
             run_setup_wizard
+            exit 0
+            ;;
+        --setup-slack)
+            setup_slack_simple
+            exit 0
+            ;;
+        --setup-discord)
+            setup_discord_simple
+            exit 0
+            ;;
+        --setup-line)
+            setup_line_simple
+            exit 0
+            ;;
+        --turn-off-notifications)
+            turn_off_all_notifications
             exit 0
             ;;
         --theme)
@@ -409,6 +425,105 @@ EOF
     echo ""
     echo -e "${GOLD}🎉 Git Auto Push の使用を開始できます！${NC}"
     echo -e "${GRAY}使用例: ap \"コミットメッセージ\"${NC}"
+}
+
+# 簡単Slackセットアップ
+setup_slack_simple() {
+    echo -e "${GREEN}📢 Slack通知の簡単セットアップ${NC}"
+    echo ""
+    echo -e "${CYAN}手順:${NC}"
+    echo -e "1. Slackでアプリを作成: https://api.slack.com/apps"
+    echo -e "2. Incoming Webhooks を有効化"
+    echo -e "3. Webhook URLをコピー"
+    echo ""
+    read -p "Webhook URLを入力してください: " webhook_url
+    
+    if [ -n "$webhook_url" ]; then
+        echo "export SLACK_WEBHOOK_URL=\"$webhook_url\"" >> ~/.bashrc
+        echo "export SLACK_WEBHOOK_URL=\"$webhook_url\"" >> ~/.zshrc
+        
+        # 設定ファイル更新
+        sed -i '' 's/slack_notifications=false/slack_notifications=true/' "$CONFIG_FILE" 2>/dev/null || \
+        echo "slack_notifications=true" >> "$CONFIG_FILE"
+        
+        echo -e "${GREEN}✅ Slack通知が設定されました！${NC}"
+        echo -e "${YELLOW}シェルの再起動または source ~/.zshrc を実行してください${NC}"
+        echo -e "${GRAY}テスト: ap --notify-slack \"テストメッセージ\"${NC}"
+    else
+        echo -e "${RED}❌ 設定がキャンセルされました${NC}"
+    fi
+}
+
+# 簡単Discordセットアップ
+setup_discord_simple() {
+    echo -e "${GREEN}💬 Discord通知の簡単セットアップ${NC}"
+    echo ""
+    echo -e "${CYAN}手順:${NC}"
+    echo -e "1. Discordサーバーの設定 → 連携サービス → ウェブフック"
+    echo -e "2. 新しいウェブフックを作成"
+    echo -e "3. ウェブフックURLをコピー"
+    echo ""
+    read -p "Webhook URLを入力してください: " webhook_url
+    
+    if [ -n "$webhook_url" ]; then
+        echo "export DISCORD_WEBHOOK_URL=\"$webhook_url\"" >> ~/.bashrc
+        echo "export DISCORD_WEBHOOK_URL=\"$webhook_url\"" >> ~/.zshrc
+        
+        # 設定ファイル更新
+        sed -i '' 's/discord_notifications=false/discord_notifications=true/' "$CONFIG_FILE" 2>/dev/null || \
+        echo "discord_notifications=true" >> "$CONFIG_FILE"
+        
+        echo -e "${GREEN}✅ Discord通知が設定されました！${NC}"
+        echo -e "${YELLOW}シェルの再起動または source ~/.zshrc を実行してください${NC}"
+        echo -e "${GRAY}テスト: ap --notify-discord \"テストメッセージ\"${NC}"
+    else
+        echo -e "${RED}❌ 設定がキャンセルされました${NC}"
+    fi
+}
+
+# 簡単LINE Notifyセットアップ
+setup_line_simple() {
+    echo -e "${GREEN}💚 LINE Notify の簡単セットアップ${NC}"
+    echo ""
+    echo -e "${CYAN}手順:${NC}"
+    echo -e "1. LINE Notify にアクセス: https://notify-bot.line.me/"
+    echo -e "2. ログイン → マイページ → トークンを発行する"
+    echo -e "3. トークン名を入力（例: Git Auto Push）"
+    echo -e "4. 通知を送信するトークルームを選択"
+    echo -e "5. 発行されたトークンをコピー"
+    echo ""
+    read -p "LINE Notify トークンを入力してください: " token
+    
+    if [ -n "$token" ]; then
+        echo "export LINE_NOTIFY_TOKEN=\"$token\"" >> ~/.bashrc
+        echo "export LINE_NOTIFY_TOKEN=\"$token\"" >> ~/.zshrc
+        
+        # 設定ファイル更新
+        sed -i '' 's/line_notifications=false/line_notifications=true/' "$CONFIG_FILE" 2>/dev/null || \
+        echo "line_notifications=true" >> "$CONFIG_FILE"
+        
+        echo -e "${GREEN}✅ LINE Notify が設定されました！${NC}"
+        echo -e "${YELLOW}シェルの再起動または source ~/.zshrc を実行してください${NC}"
+        echo -e "${GRAY}テスト: ap --notify-line \"テストメッセージ\"${NC}"
+    else
+        echo -e "${RED}❌ 設定がキャンセルされました${NC}"
+    fi
+}
+
+# 全通知OFF
+turn_off_all_notifications() {
+    echo -e "${YELLOW}🔕 全ての通知を無効化しています...${NC}"
+    
+    # 設定ファイル更新
+    sed -i '' 's/notifications=true/notifications=false/' "$CONFIG_FILE" 2>/dev/null
+    sed -i '' 's/slack_notifications=true/slack_notifications=false/' "$CONFIG_FILE" 2>/dev/null
+    sed -i '' 's/discord_notifications=true/discord_notifications=false/' "$CONFIG_FILE" 2>/dev/null
+    sed -i '' 's/line_notifications=true/line_notifications=false/' "$CONFIG_FILE" 2>/dev/null
+    sed -i '' 's/teams_notifications=true/teams_notifications=false/' "$CONFIG_FILE" 2>/dev/null
+    sed -i '' 's/email_notifications=true/email_notifications=false/' "$CONFIG_FILE" 2>/dev/null
+    
+    echo -e "${GREEN}✅ 全ての通知が無効化されました${NC}"
+    echo -e "${GRAY}静かで平和なgit pushをお楽しみください 😌${NC}"
 }
 
 # デスクトップ通知送信
@@ -1095,6 +1210,12 @@ show_git_commands() {
     echo -e "${STAR} ${GREEN}テーマ・設定:${NC}"
     echo -e "  ${YELLOW}--theme <name>${NC}      ${GRAY}# テーマ選択 (default/cyberpunk/ocean/retro)${NC}"
     echo -e "  ${YELLOW}--setup${NC}             ${GRAY}# インタラクティブ設定ウィザード${NC}"
+    
+    echo -e "${ROCKET} ${GREEN}簡単セットアップ:${NC}"
+    echo -e "  ${YELLOW}--setup-slack${NC}       ${GRAY}# Slack通知の簡単セットアップ${NC}"
+    echo -e "  ${YELLOW}--setup-discord${NC}     ${GRAY}# Discord通知の簡単セットアップ${NC}"
+    echo -e "  ${YELLOW}--setup-line${NC}        ${GRAY}# LINE Notify の簡単セットアップ${NC}"
+    echo -e "  ${YELLOW}--turn-off-notifications${NC} ${GRAY}# 全通知を無効化（静寂モード）${NC}"
     
     echo -e "${GRAY}💡 オプション: --info (リポジトリ情報) --stats (ゲーム統計) --help (このヘルプ)${NC}"
     echo ""
