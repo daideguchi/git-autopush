@@ -4,6 +4,7 @@
 # 使用方法: ./autopush.sh [カスタムメッセージ] [オプション]
 # エイリアス: ap [カスタムメッセージ] [オプション]
 # オプション: --info, --stats, --help, --game, --no-game, --quit-game
+#           --notifications, --badges, --profile, --report, --notify-slack
 
 # カラー定義
 RED='\033[0;31m'
@@ -46,6 +47,9 @@ GLOBE="🌐"
 FOLDER="📁"
 CLOCK="🕐"
 USER="👤"
+BELL="🔔"
+CAMERA="📸"
+CHART="📊"
 
 # データディレクトリとファイル
 STATS_DIR="$HOME/.autopush"
@@ -53,24 +57,36 @@ STATS_FILE="$STATS_DIR/stats.txt"
 BADGES_FILE="$STATS_DIR/badges.txt"
 STREAK_FILE="$STATS_DIR/streak.txt"
 CONFIG_FILE="$STATS_DIR/config.txt"
+BADGES_DIR="$STATS_DIR/badges"
+REPORTS_DIR="$STATS_DIR/reports"
 
 # データディレクトリを作成
-mkdir -p "$STATS_DIR"
+mkdir -p "$STATS_DIR" "$BADGES_DIR" "$REPORTS_DIR"
 
-# 設定ファイルが存在しない場合は初期化（デフォルト：ゲームモードON）
+# 設定ファイルが存在しない場合は初期化（デフォルト：ゲームモードON、通知ON）
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "game_mode=true" > "$CONFIG_FILE"
+    echo "notifications=true" >> "$CONFIG_FILE"
+    echo "badges_generation=false" >> "$CONFIG_FILE"
+    echo "profile_update=false" >> "$CONFIG_FILE"
+    echo "report_generation=false" >> "$CONFIG_FILE"
+    echo "slack_notifications=false" >> "$CONFIG_FILE"
 fi
 
 # 設定読み込み
 source "$CONFIG_FILE"
 
-# ゲームモードフラグ（設定ファイルから読み込み）
+# フラグ変数
 GAME_MODE=$game_mode
 CUSTOM_MSG=""
 SHOW_INFO=false
 SHOW_STATS=false
 SHOW_HELP=false
+ENABLE_NOTIFICATIONS=${notifications:-true}
+ENABLE_BADGES=${badges_generation:-false}
+ENABLE_PROFILE=${profile_update:-false}
+ENABLE_REPORT=${report_generation:-false}
+ENABLE_SLACK=${slack_notifications:-false}
 
 # 引数解析
 for arg in "$@"; do
@@ -100,6 +116,37 @@ for arg in "$@"; do
             ;;
         --help|--commands)
             SHOW_HELP=true
+            shift
+            ;;
+        --notifications)
+            ENABLE_NOTIFICATIONS=true
+            shift
+            ;;
+        --no-notifications)
+            ENABLE_NOTIFICATIONS=false
+            shift
+            ;;
+        --badges)
+            ENABLE_BADGES=true
+            shift
+            ;;
+        --profile)
+            ENABLE_PROFILE=true
+            shift
+            ;;
+        --report)
+            ENABLE_REPORT=true
+            shift
+            ;;
+        --notify-slack)
+            ENABLE_SLACK=true
+            shift
+            ;;
+        --enable-all)
+            ENABLE_NOTIFICATIONS=true
+            ENABLE_BADGES=true
+            ENABLE_PROFILE=true
+            ENABLE_REPORT=true
             shift
             ;;
         *)
@@ -173,6 +220,185 @@ calculate_level() {
     done
     
     echo $new_level
+}
+
+# デスクトップ通知送信
+send_notification() {
+    local title="$1"
+    local message="$2"
+    local sound="${3:-Glass}"
+    
+    if [ "$ENABLE_NOTIFICATIONS" = true ]; then
+        # macOS
+        if command -v osascript >/dev/null 2>&1; then
+            osascript -e "display notification \"$message\" with title \"$title\" sound name \"$sound\""
+        # Linux with notify-send
+        elif command -v notify-send >/dev/null 2>&1; then
+            notify-send "$title" "$message"
+        fi
+    fi
+}
+
+# SVGバッジ生成
+generate_badge() {
+    local badge_type="$1"
+    local value="$2"
+    local color="$3"
+    local file_path="$BADGES_DIR/${badge_type}.svg"
+    
+    if [ "$ENABLE_BADGES" = true ]; then
+        cat > "$file_path" << EOF
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="20">
+  <linearGradient id="b" x2="0" y2="100%">
+    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+    <stop offset="1" stop-opacity=".1"/>
+  </linearGradient>
+  <clipPath id="a">
+    <rect width="120" height="20" rx="3" fill="#fff"/>
+  </clipPath>
+  <g clip-path="url(#a)">
+    <path fill="#555" d="M0 0h63v20H0z"/>
+    <path fill="$color" d="M63 0h57v20H63z"/>
+    <path fill="url(#b)" d="M0 0h120v20H0z"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="110">
+    <text x="325" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="530">${badge_type}</text>
+    <text x="325" y="140" transform="scale(.1)" textLength="530">${badge_type}</text>
+    <text x="905" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="470">${value}</text>
+    <text x="905" y="140" transform="scale(.1)" textLength="470">${value}</text>
+  </g>
+</svg>
+EOF
+        echo -e "${CAMERA} SVGバッジ生成: ${file_path}"
+    fi
+}
+
+# GitHub Profile README用Markdown生成
+generate_profile_markdown() {
+    if [ "$ENABLE_PROFILE" = true ]; then
+        load_stats
+        load_streak
+        
+        local profile_file="$STATS_DIR/profile-stats.md"
+        cat > "$profile_file" << EOF
+## 🚀 Git Auto Push Stats
+
+![Level](https://img.shields.io/badge/Level-${level}-gold?style=flat-square&logo=star)
+![XP](https://img.shields.io/badge/XP-${xp}-blue?style=flat-square&logo=lightning)
+![Streak](https://img.shields.io/badge/Streak-${current_streak}days-red?style=flat-square&logo=fire)
+![Total Pushes](https://img.shields.io/badge/Pushes-${total_pushes}-green?style=flat-square&logo=git)
+
+### 🏆 Recent Achievements
+EOF
+        
+        if [ -f "$BADGES_FILE" ] && [ -s "$BADGES_FILE" ]; then
+            while IFS='|' read -r name emoji desc; do
+                echo "- $emoji **$name**: $desc" >> "$profile_file"
+            done < "$BADGES_FILE"
+        fi
+        
+        echo -e "${GLOBE} Profile Markdown生成: ${profile_file}"
+    fi
+}
+
+# HTML統計レポート生成
+generate_html_report() {
+    if [ "$ENABLE_REPORT" = true ]; then
+        load_stats
+        load_streak
+        
+        local html_file="$REPORTS_DIR/stats-$(date '+%Y%m%d').html"
+        cat > "$html_file" << EOF
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Git Auto Push Statistics</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 20px; color: white; }
+        .container { max-width: 800px; margin: 0 auto; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 30px 0; }
+        .stat-card { background: rgba(255,255,255,0.2); padding: 20px; border-radius: 15px; text-align: center; }
+        .stat-value { font-size: 2em; font-weight: bold; color: #ffd700; }
+        .progress-bar { background: rgba(0,0,0,0.3); height: 20px; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { background: linear-gradient(90deg, #00ff88, #00ccff); height: 100%; transition: width 0.3s ease; }
+        .badges { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
+        .badge { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-size: 14px; }
+        .timestamp { text-align: center; opacity: 0.7; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Git Auto Push Statistics</h1>
+            <p>Your development journey in numbers</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">Lv.${level}</div>
+                <div>レベル</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${xp}</div>
+                <div>経験値</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: $((xp % 100))%"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${current_streak}</div>
+                <div>🔥 現在のストリーク</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${total_pushes}</div>
+                <div>🚀 総プッシュ数</div>
+            </div>
+        </div>
+        
+        <div class="badges">
+EOF
+        
+        if [ -f "$BADGES_FILE" ] && [ -s "$BADGES_FILE" ]; then
+            while IFS='|' read -r name emoji desc; do
+                echo "            <div class=\"badge\">$emoji $name</div>" >> "$html_file"
+            done < "$BADGES_FILE"
+        fi
+        
+        cat >> "$html_file" << EOF
+        </div>
+        
+        <div class="timestamp">
+            Generated on $(date '+%Y-%m-%d %H:%M:%S')
+        </div>
+    </div>
+</body>
+</html>
+EOF
+        
+        echo -e "${CHART} HTML レポート生成: ${html_file}"
+        
+        # 自動でブラウザを開く
+        if command -v open >/dev/null 2>&1; then
+            open "$html_file" 2>/dev/null
+        elif command -v xdg-open >/dev/null 2>&1; then
+            xdg-open "$html_file" 2>/dev/null
+        fi
+    fi
+}
+
+# Slack通知送信
+send_slack_notification() {
+    local webhook_url="$SLACK_WEBHOOK_URL"
+    local message="$1"
+    
+    if [ "$ENABLE_SLACK" = true ] && [ -n "$webhook_url" ]; then
+        curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"$message\"}" \
+            "$webhook_url" 2>/dev/null
+    fi
 }
 
 # コンパクトなリポジトリ情報表示
@@ -264,6 +490,12 @@ add_badge() {
             echo -e "${GOLD}${SPARKLES} 新しいバッジを獲得！ ${badge_emoji} ${badge_name}${NC}"
             echo -e "${CYAN}「${badge_desc}」${NC}"
             echo ""
+            
+            # 通知送信
+            send_notification "🏆 新バッジ獲得!" "$badge_emoji $badge_name: $badge_desc"
+            
+            # Slack通知
+            send_slack_notification "🏆 *新バッジ獲得!* $badge_emoji *$badge_name*: $badge_desc"
         fi
     fi
 }
@@ -322,6 +554,12 @@ show_levelup_effect() {
     echo -e "${GOLD}${CROWN}${CROWN}${CROWN} LEVEL UP! ${CROWN}${CROWN}${CROWN}${NC}"
     echo -e "${MAGENTA}${SPARKLES} レベル $level に到達しました！ ${SPARKLES}${NC}"
     echo ""
+    
+    # レベルアップ通知
+    send_notification "🎉 レベルアップ!" "おめでとうございます！レベル $level に到達しました！" "Sosumi"
+    
+    # Slack通知
+    send_slack_notification "🎉 *レベルアップ!* おめでとうございます！レベル *$level* に到達しました！"
 }
 
 # Gitコマンドクイックリファレンス表示
@@ -353,6 +591,13 @@ show_git_commands() {
     echo -e "  ${YELLOW}git pull${NC}            ${GRAY}# リモートから最新を取得${NC}"
     echo -e "  ${YELLOW}git fetch${NC}           ${GRAY}# リモート情報を取得（マージしない）${NC}"
     echo -e "  ${YELLOW}git remote -v${NC}       ${GRAY}# リモートリポジトリ一覧${NC}"
+    
+    echo -e "${BELL} ${GREEN}視覚的機能:${NC}"
+    echo -e "  ${YELLOW}--notifications${NC}     ${GRAY}# デスクトップ通知有効${NC}"
+    echo -e "  ${YELLOW}--badges${NC}            ${GRAY}# SVGバッジ生成${NC}"
+    echo -e "  ${YELLOW}--profile${NC}           ${GRAY}# GitHub Profile用Markdown生成${NC}"
+    echo -e "  ${YELLOW}--report${NC}            ${GRAY}# HTML統計レポート生成${NC}"
+    echo -e "  ${YELLOW}--enable-all${NC}        ${GRAY}# 全視覚的機能有効${NC}"
     
     echo -e "${GRAY}💡 オプション: --info (リポジトリ情報) --stats (ゲーム統計) --help (このヘルプ)${NC}"
     echo ""
@@ -429,6 +674,28 @@ check_badges() {
         50) add_badge "レベル50到達" "👑" "レベル50に到達" ;;
         100) add_badge "レベル100到達" "💎" "レベル100に到達" ;;
     esac
+}
+
+# 視覚的機能実行
+execute_visual_features() {
+    if [ "$GAME_MODE" = true ]; then
+        load_stats
+        load_streak
+        
+        # SVGバッジ生成
+        if [ "$ENABLE_BADGES" = true ]; then
+            generate_badge "Level" "$level" "#ffd700"
+            generate_badge "XP" "$xp" "#00ccff"
+            generate_badge "Streak" "${current_streak}days" "#ff4444"
+            generate_badge "Pushes" "$total_pushes" "#00ff88"
+        fi
+        
+        # Profile Markdown生成
+        generate_profile_markdown
+        
+        # HTML レポート生成
+        generate_html_report
+    fi
 }
 
 # メインロジック開始
@@ -562,9 +829,15 @@ if git push; then
         # バッジチェック
         check_badges
         
+        # 視覚的機能実行
+        execute_visual_features
+        
         # 励ましメッセージ
         echo -e "${SPARKLES} ${MAGENTA}$(get_encouragement)${NC}"
         echo -e "${PARTY} ${GOLD}+50 XP獲得！${NC}"
+        
+        # 基本通知
+        send_notification "🚀 Git Push 完了!" "$(get_encouragement) (+50 XP)"
         
         # ストリーク表示
         load_streak
