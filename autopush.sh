@@ -1369,45 +1369,27 @@ get_random_ascii_art() {
     echo "${arts[$((RANDOM % ${#arts[@]}))]}"
 }
 
-# カラフルパーティクル効果
+# カラフルパーティクル効果（コンパクト版）
 show_particle_effect() {
     local particles=("✨" "🌟" "⭐" "💫" "🌠" "⚡" "🔥" "💥" "🎊" "🎉" "💎" "🌈")
     local colors=("${RED}" "${GREEN}" "${YELLOW}" "${BLUE}" "${PURPLE}" "${CYAN}" "${GOLD}")
     
-    echo ""
-    for i in {1..3}; do
-        local line=""
-        for j in {1..20}; do
-            local particle="${particles[$((RANDOM % ${#particles[@]}))]}"
-            local color="${colors[$((RANDOM % ${#colors[@]}))]}"
-            line+="${color}${particle}${NC} "
-        done
-        echo -e "$line"
-        sleep 0.05
+    local line=""
+    for j in {1..12}; do
+        local particle="${particles[$((RANDOM % ${#particles[@]}))]}"
+        local color="${colors[$((RANDOM % ${#colors[@]}))]}"
+        line+="${color}${particle}${NC} "
     done
-    echo ""
+    echo -e "$line"
 }
 
-# アニメーション花火
+# アニメーション花火（コンパクト版）
 show_fireworks() {
-    echo ""
-    local firework_frames=(
-        "       💥       "
-        "     💥💥💥     "
-        "   💥💥💥💥💥   "
-        " 💥💥💥💥💥💥💥 "
-        "💥💥💥💥💥💥💥💥💥"
-        " ⭐⭐⭐⭐⭐⭐⭐ "
-        "   ✨✨✨✨✨   "
-        "     ⚡⚡⚡     "
-        "       💫       "
-    )
-    
-    for frame in "${firework_frames[@]}"; do
-        echo -e "${GOLD}$frame${NC}"
-        sleep 0.1
-    done
-    echo ""
+    echo -e "${GOLD}       💥       ${NC}"
+    sleep 0.1
+    echo -e "${GOLD} 💥💥💥💥💥💥💥 ${NC}"
+    sleep 0.1
+    echo -e "${GOLD}   ⭐✨⚡✨⭐   ${NC}"
 }
 
 # レインボー効果
@@ -1425,60 +1407,35 @@ show_rainbow_text() {
     echo -e "$output"
 }
 
-# プルス効果
+# プルス効果（コンパクト版）
 show_pulse_effect() {
     local text="$1"
-    for i in {1..2}; do
-        echo -e "${GOLD}${text}${NC}"
-        sleep 0.2
-        echo -e "${YELLOW}${text}${NC}"
-        sleep 0.2
-    done
+    echo -e "${GOLD}${text}${NC}"
+    sleep 0.1
+    echo -e "${YELLOW}${text}${NC}"
 }
 
-# スパークル波
+# スパークル波（コンパクト版）
 show_sparkle_wave() {
-    local wave1="✨        ✨        ✨        ✨"
-    local wave2="  ⭐        ⭐        ⭐      "
-    local wave3="    🌟        🌟        🌟    "
-    local wave4="      💫        💫        💫  "
-    
-    for i in {1..2}; do
-        echo -e "${GOLD}$wave1${NC}"
-        sleep 0.05
-        echo -e "${CYAN}$wave2${NC}"
-        sleep 0.05
-        echo -e "${PURPLE}$wave3${NC}"
-        sleep 0.05
-        echo -e "${BLUE}$wave4${NC}"
-        sleep 0.05
-    done
+    echo -e "${GOLD}✨${NC} ${CYAN}⭐${NC} ${PURPLE}🌟${NC} ${BLUE}💫${NC} ${GOLD}✨${NC} ${CYAN}⭐${NC} ${PURPLE}🌟${NC} ${BLUE}💫${NC} ${GOLD}✨${NC} ${CYAN}⭐${NC} ${PURPLE}🌟${NC} ${BLUE}💫${NC}"
 }
 
-# レベルアップ超派手演出
+# レベルアップ超派手演出（コンパクト版）
 show_mega_levelup_effect() {
-    echo ""
     show_fireworks
-    
-    show_rainbow_text "╔══════════════════════════════════════╗"
-    show_rainbow_text "║           LEVEL UP!!!                ║"
-    show_rainbow_text "║     🏆👑 CONGRATULATIONS! 👑🏆      ║"
-    show_rainbow_text "╚══════════════════════════════════════╝"
-    
+    show_rainbow_text "🏆👑 LEVEL UP CONGRATULATIONS! 👑🏆"
     show_particle_effect
-    show_sparkle_wave
 }
 
-# ランダム勝利演出
+# ランダム勝利演出（コンパクト版）
 show_random_victory_effect() {
     local effects=(1 2 3 4 5)
     local chosen_effect=${effects[$((RANDOM % ${#effects[@]}))]}
     
     case $chosen_effect in
-        1)  # ASCII アート + パーティクル
-            echo ""
-            echo -e "${GOLD}$(get_random_ascii_art)${NC}"
-            show_particle_effect
+        1)  # ASCII アート（1行のみ）
+            local art_lines=("✨🎉 AWESOME! 🎉✨" "🔥🚀 EPIC! 🚀🔥" "💫🌟 LEGENDARY! 🌟💫" "🎯🏆 PERFECT! 🏆🎯" "🌈✨ MAGICAL! ✨🌈")
+            echo -e "${GOLD}${art_lines[$((RANDOM % ${#art_lines[@]}))]}${NC}"
             ;;
         2)  # 花火
             show_fireworks
@@ -1487,46 +1444,34 @@ show_random_victory_effect() {
             show_sparkle_wave
             ;;
         4)  # レインボーテキスト
-            echo ""
-            show_rainbow_text "🎉 AMAZING PUSH! 🎉"
-            show_rainbow_text "✨ KEEP IT UP! ✨"
-            echo ""
+            show_rainbow_text "🎉 AMAZING PUSH! ✨ KEEP IT UP! 🎉"
             ;;
-        5)  # パルス効果
-            echo ""
-            show_pulse_effect "🎯 BULLSEYE! 🎯"
-            show_pulse_effect "🚀 TO THE MOON! 🚀"
-            echo ""
+        5)  # パーティクル効果
+            show_particle_effect
             ;;
     esac
 }
 
-# 特別な日の演出
+# 特別な日の演出（コンパクト版）
 show_special_day_effect() {
     local day=$(date +%u)  # 1-7 (月-日)
     local hour=$(date +%H)
     
     # 金曜日の夜は特別演出
     if [ $day -eq 5 ] && [ $hour -ge 18 ]; then
-        echo ""
         show_rainbow_text "🍻 FRIDAY NIGHT CODING! 🍻"
-        show_particle_effect
         return
     fi
     
     # 週末は休日演出
     if [ $day -eq 6 ] || [ $day -eq 7 ]; then
-        echo ""
         show_rainbow_text "🏖️ WEEKEND WARRIOR! 🏖️"
-        show_sparkle_wave
         return
     fi
     
     # 月曜日は励まし演出
     if [ $day -eq 1 ]; then
-        echo ""
         show_rainbow_text "💪 MONDAY MOTIVATION! 💪"
-        show_pulse_effect "🔥 Let's crush this week! 🔥"
         return
     fi
 }
@@ -1880,15 +1825,33 @@ if git push >/dev/null 2>&1; then
         # 視覚的機能実行
         execute_visual_features
         
-        # ランダム勝利演出（毎回楽しい！）
-        show_random_victory_effect
+        # 特別な日の演出があるかチェック
+        local day=$(date +%u)
+        local hour=$(date +%H)
+        local has_special_day=false
         
-        # 特別な日の演出
-        show_special_day_effect
+        # 特別な日の演出（優先）
+        if [ $day -eq 5 ] && [ $hour -ge 18 ]; then
+            show_rainbow_text "🍻 FRIDAY NIGHT CODING! 🍻"
+            has_special_day=true
+        elif [ $day -eq 6 ] || [ $day -eq 7 ]; then
+            show_rainbow_text "🏖️ WEEKEND WARRIOR! 🏖️"
+            has_special_day=true
+        elif [ $day -eq 1 ]; then
+            show_rainbow_text "💪 MONDAY MOTIVATION! 💪"
+            has_special_day=true
+        fi
         
-        # コンボ演出（ストリークボーナス）
+        # 特別演出がない場合のみランダム演出
+        if [ "$has_special_day" = false ]; then
+            show_random_victory_effect
+        fi
+        
+        # コンボ演出（ストリークボーナス - 10日以上のみ）
         load_streak
-        show_combo_effect $current_streak
+        if [ $current_streak -ge 10 ]; then
+            show_combo_effect $current_streak
+        fi
         
         # 励ましメッセージ
         echo -e "${SPARKLES} ${MAGENTA}$(get_encouragement)${NC}"
