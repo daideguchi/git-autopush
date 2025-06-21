@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Git Auto Push - チーム開発+AI機能付き究極Gitツール | ゲーミフィケーション自動化ツール</title>
+    
+    <!-- SEO最適化メタタグ -->
+    <meta name="description" content="Gitプッシュをゲーム化！新機能：軽量チーム開発+AI駆動PR作成。レベルアップ・XP・ストリーク機能付きの革新的な自動プッシュツール。3秒インストール、全プロジェクト対応で開発効率UP。無料・オープンソース">
+    <meta name="keywords" content="Git,自動プッシュ,ゲーミフィケーション,開発ツール,プログラミング,GitHub,レベルアップ,XP,ストリーク,無料ツール,オープンソース,チーム開発,AI">
+    <meta name="author" content="Daiki Deguchi (@daideguchi)">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-rainbow: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3, #54a0ff);
+            --border-radius: 16px;
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* パーティクル背景効果 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            animation: float-particle 6s infinite linear;
+            opacity: 0.6;
+        }
+        
+        /* 楽しいアニメーション */
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+        
+        @keyframes wiggle {
+            0%, 7% { transform: rotateZ(0); }
+            15% { transform: rotateZ(-15deg); }
+            20% { transform: rotateZ(10deg); }
+            25% { transform: rotateZ(-10deg); }
+            30% { transform: rotateZ(6deg); }
+            35% { transform: rotateZ(-4deg); }
+            40%, 100% { transform: rotateZ(0); }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.8), 0 0 60px rgba(139, 92, 246, 0.6); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes typing {
+            0% { width: 0; }
+            100% { width: 100%; }
+        }
+        
+        @keyframes slideInLeft {
+            0% { transform: translateX(-100px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideInRight {
+            0% { transform: translateX(100px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes zoomIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            padding: 1rem 0;
+            animation: slideInLeft 1s ease-out;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-rainbow);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbow 3s ease infinite, bounce 2s ease-in-out infinite;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary-color);
+            transform: translateY(-2px);
+            animation: glow 1s ease-in-out;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 8rem 0 4rem;
+            text-align: center;
+            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23334155" stroke-width="0.5" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.5;
+            animation: float 10s ease-in-out infinite;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: zoomIn 1s ease-out;
+        }
+        
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-rainbow);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            animation: rainbow 4s ease infinite, pulse 3s ease-in-out infinite;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: slideInLeft 1s ease-out 0.5s both;
+        }
+        
+        .hero-features {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            animation: slideInRight 1s ease-out 0.7s both;
+        }
+        
+        .hero-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .hero-feature:nth-child(1) { animation-delay: 0s; }
+        .hero-feature:nth-child(2) { animation-delay: 0.5s; }
+        .hero-feature:nth-child(3) { animation-delay: 1s; }
+        
+        .hero-feature:hover {
+            transform: translateY(-5px) scale(1.05);
+            background: rgba(99, 102, 241, 0.2);
+            animation: wiggle 0.5s ease-in-out, glow 1s ease-in-out;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: zoomIn 1s ease-out 1s both;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-glow);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.8);
+            animation: bounce 0.6s ease-in-out;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-color);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            animation: glow 1s ease-in-out;
+        }
+        
+        /* New Features Section */
+        .new-features {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .new-badge {
+            display: inline-block;
+            background: var(--gradient-accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite, bounce 3s ease-in-out infinite;
+            position: relative;
+        }
+        
+        .new-badge::after {
+            content: '✨';
+            position: absolute;
+            right: -10px;
+            top: -10px;
+            animation: spin 2s linear infinite;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient-rainbow);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbow 3s ease infinite, zoomIn 1s ease-out;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 4rem;
+            font-size: 1.1rem;
+            animation: slideInLeft 1s ease-out 0.3s both;
+        }
+        
+        .new-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .new-feature-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        .new-feature-card:nth-child(1) { animation-delay: 0s; }
+        .new-feature-card:nth-child(2) { animation-delay: 1s; }
+        .new-feature-card:nth-child(3) { animation-delay: 2s; }
+        
+        .new-feature-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+        
+        .new-feature-card:hover::before {
+            animation: spin 1s linear;
+            opacity: 1;
+        }
+        
+        .new-feature-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(99, 102, 241, 0.4);
+            border-color: var(--primary-color);
+            animation: glow 2s infinite, wiggle 0.5s ease-in-out;
+        }
+        
+        .new-feature-card .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        .new-feature-card:hover .feature-icon {
+            animation: spin 0.5s ease-in-out, bounce 2s ease-in-out infinite;
+        }
+        
+        .feature-demo {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-demo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.2), transparent);
+            animation: typing 2s ease-in-out infinite;
+        }
+        
+        .feature-demo code {
+            color: #00ff00;
+            font-size: 0.9rem;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        /* 楽しいフローティング要素 */
+        .floating-emoji {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.7;
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        .floating-emoji:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .floating-emoji:nth-child(2) { top: 20%; right: 15%; animation-delay: 1s; }
+        .floating-emoji:nth-child(3) { bottom: 30%; left: 5%; animation-delay: 2s; }
+        .floating-emoji:nth-child(4) { bottom: 10%; right: 10%; animation-delay: 3s; }
+        
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-features {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .new-features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- パーティクル背景 -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- フローティング絵文字 -->
+    <div class="floating-emoji">🚀</div>
+    <div class="floating-emoji">⚡</div>
+    <div class="floating-emoji">🎮</div>
+    <div class="floating-emoji">✨</div>
+    
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">🎮 Git Auto Push</div>
+            <ul class="nav-links">
+                <li><a href="#features">機能</a></li>
+                <li><a href="#installation">インストール</a></li>
+                <li><a href="https://github.com/daideguchi/git-autopush" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>🎮 Git Auto Push<br>究極のゲーミング開発ツール</h1>
+                <p class="hero-subtitle">
+                    Gitプッシュをゲーム化！新機能：軽量チーム開発+AI駆動PR作成で、開発がもっと楽しく、もっと効率的に。
+                </p>
+                
+                <div class="hero-features">
+                    <div class="hero-feature">
+                        <span>🎮</span>
+                        <span>ゲーミフィケーション</span>
+                    </div>
+                    <div class="hero-feature">
+                        <span>👥</span>
+                        <span>チーム開発</span>
+                    </div>
+                    <div class="hero-feature">
+                        <span>🤖</span>
+                        <span>AI自動化</span>
+                    </div>
+                </div>
+                
+                <div class="cta-buttons">
+                    <a href="#installation" class="btn btn-primary">
+                        <span>🚀</span>
+                        <span>今すぐ始める</span>
+                    </a>
+                    <a href="https://github.com/daideguchi/git-autopush" class="btn btn-secondary" target="_blank">
+                        <span>📚</span>
+                        <span>GitHub で見る</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Features Highlight -->
+    <section class="new-features">
+        <div class="container">
+            <div class="new-badge">🆕 NEW</div>
+            <h2 class="section-title">🎮 チーム開発 + 🤖 AI機能 追加！</h2>
+            <p class="section-subtitle">
+                軽量で高速なチーム開発機能と、AI駆動の自動PR作成機能が新登場！
+            </p>
+            
+            <div class="new-features-grid">
+                <div class="new-feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>シンプルチーム開発</h3>
+                    <p>軽量設計で高速動作。簡単セットアップでチーム全体の開発効率UP</p>
+                    <div class="feature-demo">
+                        <code>ap --create-team "dev-team"</code>
+                    </div>
+                </div>
+                
+                <div class="new-feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI駆動PR作成</h3>
+                    <p>コミット履歴を分析してスマートなPRタイトルと説明文を自動生成</p>
+                    <div class="feature-demo">
+                        <code>ap --auto-pr</code>
+                    </div>
+                </div>
+                
+                <div class="new-feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>リアルタイム統計</h3>
+                    <p>チームの活動状況、コミット数、貢献者ランキングを瞬時に表示</p>
+                    <div class="feature-demo">
+                        <code>ap --team-dashboard</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section id="installation" class="installation" style="padding: 6rem 0; text-align: center; position: relative; z-index: 2;">
+        <div class="container">
+            <h2 class="section-title">🚀 簡単3ステップで始めよう</h2>
+            <p class="section-subtitle">
+                技術的な知識は不要。コピー＆ペーストするだけで、すぐに楽しいGitライフが始まります。
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem; max-width: 900px; margin-left: auto; margin-right: auto;">
+                <div style="background: rgba(255, 255, 255, 0.05); border-radius: var(--border-radius); padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; animation: float 3s ease-in-out infinite;">
+                    <div style="width: 60px; height: 60px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; color: white; margin: 0 auto 1rem; animation: bounce 2s ease-in-out infinite;">1</div>
+                    <h3 style="margin-bottom: 1rem; color: var(--text-color);">📥 ダウンロード</h3>
+                    <div style="background: rgba(0, 0, 0, 0.4); border-radius: 8px; padding: 1rem; font-family: 'Fira Code', monospace; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1rem; position: relative;">
+                        curl -O https://raw.githubusercontent.com/daideguchi/git-autopush/main/autopush.sh
+                        <button onclick="copyToClipboard(this)" style="position: absolute; right: 10px; top: 10px; background: var(--primary-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: all 0.3s ease;">コピー</button>
+                    </div>
+                    <p style="color: var(--text-muted);">GitHubから最新版をダウンロード</p>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.05); border-radius: var(--border-radius); padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; animation: float 3s ease-in-out infinite 1s;">
+                    <div style="width: 60px; height: 60px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; color: white; margin: 0 auto 1rem; animation: bounce 2s ease-in-out infinite 0.5s;">2</div>
+                    <h3 style="margin-bottom: 1rem; color: var(--text-color);">🔧 システムインストール</h3>
+                    <div style="background: rgba(0, 0, 0, 0.4); border-radius: 8px; padding: 1rem; font-family: 'Fira Code', monospace; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1rem; position: relative;">
+                        chmod +x autopush.sh && ./autopush.sh --install
+                        <button onclick="copyToClipboard(this)" style="position: absolute; right: 10px; top: 10px; background: var(--primary-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: all 0.3s ease;">コピー</button>
+                    </div>
+                    <p style="color: var(--text-muted);">全プロジェクトで使える <code>ap</code> コマンドを追加</p>
+                </div>
+                
+                <div style="background: rgba(255, 255, 255, 0.05); border-radius: var(--border-radius); padding: 2rem; border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s ease; animation: float 3s ease-in-out infinite 2s;">
+                    <div style="width: 60px; height: 60px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; color: white; margin: 0 auto 1rem; animation: bounce 2s ease-in-out infinite 1s;">3</div>
+                    <h3 style="margin-bottom: 1rem; color: var(--text-color);">🎉 初回プッシュ</h3>
+                    <div style="background: rgba(0, 0, 0, 0.4); border-radius: 8px; padding: 1rem; font-family: 'Fira Code', monospace; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1rem; position: relative;">
+                        ap "🎮 初回ゲーミングプッシュ！"
+                        <button onclick="copyToClipboard(this)" style="position: absolute; right: 10px; top: 10px; background: var(--primary-color); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: all 0.3s ease;">コピー</button>
+                    </div>
+                    <p style="color: var(--text-muted);">楽しいGitライフの始まり！</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 3rem; padding: 2rem; background: rgba(16, 185, 129, 0.1); border-radius: var(--border-radius); border: 1px solid rgba(16, 185, 129, 0.3); animation: glow 3s ease-in-out infinite;">
+                <h3 style="color: var(--success-color); margin-bottom: 1rem;">💡 Pro Tip</h3>
+                <p>インストール後は <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">ap --update</code> でいつでも最新版に更新できます。全プロジェクトが自動で同期されます！</p>
+            </div>
+            
+            <div style="margin-top: 2rem; padding: 2rem; background: rgba(99, 102, 241, 0.1); border-radius: var(--border-radius); border: 1px solid rgba(99, 102, 241, 0.3); animation: pulse 4s ease-in-out infinite;">
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">🆕 新機能も試してみよう</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div style="animation: bounce 2s ease-in-out infinite;">
+                        <code style="color: #00ff00; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 4px; display: block;">ap --create-team "dev-team"</code>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">チーム作成</p>
+                    </div>
+                    <div style="animation: bounce 2s ease-in-out infinite 0.5s;">
+                        <code style="color: #00ff00; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 4px; display: block;">ap --team-dashboard</code>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">チーム統計</p>
+                    </div>
+                    <div style="animation: bounce 2s ease-in-out infinite 1s;">
+                        <code style="color: #00ff00; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 4px; display: block;">ap --auto-pr</code>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">AI PR作成</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JavaScript -->
+    <script>
+        // パーティクル生成
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                
+                // ランダムな色
+                const colors = ['#6366f1', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // コピー機能
+        function copyToClipboard(button) {
+            const command = button.parentNode.textContent.replace('コピー', '').trim();
+            navigator.clipboard.writeText(command).then(() => {
+                button.textContent = '✅ コピー済み';
+                button.style.animation = 'bounce 0.5s ease-in-out';
+                setTimeout(() => {
+                    button.textContent = 'コピー';
+                    button.style.animation = '';
+                }, 2000);
+            });
+        }
+        
+        // スムーススクロール
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // マウス追従エフェクト
+        document.addEventListener('mousemove', (e) => {
+            const cursor = document.createElement('div');
+            cursor.style.cssText = `
+                position: fixed;
+                width: 10px;
+                height: 10px;
+                background: radial-gradient(circle, rgba(99,102,241,0.8) 0%, transparent 70%);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 9999;
+                left: ${e.clientX - 5}px;
+                top: ${e.clientY - 5}px;
+                animation: pulse 0.5s ease-out;
+            `;
+            document.body.appendChild(cursor);
+            
+            setTimeout(() => {
+                cursor.remove();
+            }, 500);
+        });
+        
+        // スクロール時のアニメーション
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // 要素の観察開始
+        document.querySelectorAll('.new-feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(50px)';
+            card.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+            observer.observe(card);
+        });
+        
+        // ページ読み込み時の初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            
+            // ランダムな楽しい効果
+            setInterval(() => {
+                const emojis = document.querySelectorAll('.floating-emoji');
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                randomEmoji.style.animation = 'spin 1s ease-in-out, float 6s ease-in-out infinite';
+                
+                setTimeout(() => {
+                    randomEmoji.style.animation = 'float 6s ease-in-out infinite';
+                }, 1000);
+            }, 3000);
+        });
+        
+        // キーボード操作対応
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                document.body.classList.add('keyboard-navigation');
+            }
+            
+            // 隠し機能：Konami Code
+            const konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+            window.konamiIndex = window.konamiIndex || 0;
+            
+            if (e.keyCode === konamiCode[window.konamiIndex]) {
+                window.konamiIndex++;
+                if (window.konamiIndex === konamiCode.length) {
+                    // 特別なアニメーション効果
+                    document.body.style.animation = 'rainbow 2s ease infinite';
+                    setTimeout(() => {
+                        document.body.style.animation = '';
+                        window.konamiIndex = 0;
+                    }, 4000);
+                }
+            } else {
+                window.konamiIndex = 0;
+            }
+        });
+    </script>
+    
+    <!-- 本物のタイピング演出スクリプト -->
+    <script>
+        // 本物のタイピング演出（前の実装を復活）
+        const commands = [
+            'ap "✨ 新機能実装完了"',
+            'ap "🐛 バグ修正"',
+            'ap "📝 ドキュメント更新"',
+            'ap',
+            'ap "🎉 リリース準備完了"'
+        ];
+        
+        let commandIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typingSpeed = 100;
+        const deletingSpeed = 50;
+        const pauseTime = 2000;
+        
+        function typeWriter() {
+            const currentCommand = commands[commandIndex];
+            const typingElement = document.getElementById('typing-text');
+            
+            if (!typingElement) return;
+            
+            if (!isDeleting && charIndex < currentCommand.length) {
+                typingElement.textContent += currentCommand.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, typingSpeed);
+            } else if (isDeleting && charIndex > 0) {
+                typingElement.textContent = currentCommand.substring(0, charIndex - 1);
+                charIndex--;
+                setTimeout(typeWriter, deletingSpeed);
+            } else if (!isDeleting && charIndex === currentCommand.length) {
+                // Show terminal output
+                if (commandIndex === 0) {
+                    setTimeout(() => {
+                        const output = document.getElementById('terminal-output');
+                        if (output) output.style.opacity = '1';
+                    }, 1000);
+                }
+                
+                setTimeout(() => {
+                    isDeleting = true;
+                    typeWriter();
+                }, pauseTime);
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                commandIndex = (commandIndex + 1) % commands.length;
+                
+                // Hide terminal output when starting new cycle
+                if (commandIndex === 0) {
+                    const output = document.getElementById('terminal-output');
+                    if (output) output.style.opacity = '0';
+                }
+                
+                setTimeout(typeWriter, 500);
+            }
+        }
+        
+        // Start typing effect
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(typeWriter, 1000);
+        });
+        
+        // ターミナルクリック時にリスタート
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.terminal')) {
+                // リセット
+                commandIndex = 0;
+                charIndex = 0;
+                isDeleting = false;
+                const typingElement = document.getElementById('typing-text');
+                const output = document.getElementById('terminal-output');
+                if (typingElement) typingElement.textContent = '';
+                if (output) output.style.opacity = '0';
+                setTimeout(typeWriter, 500);
+            }
+        });
+    </script>
+    
+    <!-- タイピング演出スクリプト -->
+    <script>
+        // 本物のタイピング演出
+        const commands = [
+            'ap "✨ 新機能実装完了"',
+            'ap "🐛 バグ修正"',
+            'ap "📝 ドキュメント更新"',
+            'ap',
+            'ap "🎉 リリース準備完了"'
+        ];
+        
+        let commandIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typingSpeed = 100;
+        const deletingSpeed = 50;
+        const pauseTime = 2000;
+        
+        function typeWriter() {
+            const currentCommand = commands[commandIndex];
+            const typingElement = document.getElementById('typing-text');
+            
+            if (!typingElement) return;
+            
+            if (!isDeleting && charIndex < currentCommand.length) {
+                typingElement.textContent += currentCommand.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, typingSpeed);
+            } else if (isDeleting && charIndex > 0) {
+                typingElement.textContent = currentCommand.substring(0, charIndex - 1);
+                charIndex--;
+                setTimeout(typeWriter, deletingSpeed);
+            } else if (!isDeleting && charIndex === currentCommand.length) {
+                // Show terminal output
+                if (commandIndex === 0) {
+                    setTimeout(() => {
+                        const output = document.getElementById('terminal-output');
+                        if (output) output.style.opacity = '1';
+                    }, 1000);
+                }
+                
+                setTimeout(() => {
+                    isDeleting = true;
+                    typeWriter();
+                }, pauseTime);
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                commandIndex = (commandIndex + 1) % commands.length;
+                
+                // Hide terminal output when starting new cycle
+                if (commandIndex === 0) {
+                    const output = document.getElementById('terminal-output');
+                    if (output) output.style.opacity = '0';
+                }
+                
+                setTimeout(typeWriter, 500);
+            }
+        }
+        
+        // Start typing effect
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(typeWriter, 1000);
+        });
+        
+        // ターミナルクリック時にリスタート
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.terminal')) {
+                // リセット
+                commandIndex = 0;
+                charIndex = 0;
+                isDeleting = false;
+                const typingElement = document.getElementById('typing-text');
+                const output = document.getElementById('terminal-output');
+                if (typingElement) typingElement.textContent = '';
+                if (output) output.style.opacity = '0';
+                setTimeout(typeWriter, 500);
+            }
+        });
+    </script>
+</body>
+</html> 

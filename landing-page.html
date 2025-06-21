@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 Git Auto Push - ゲーミング付き究極Gitツール | コーディングが楽しくなる自動化ツール</title>
+    <title>🎮 Git Auto Push - チーム開発+AI機能付き究極Gitツール | ゲーミフィケーション自動化ツール</title>
     
     <!-- SEO最適化メタタグ -->
-    <meta name="description" content="Gitプッシュをゲーム化！レベルアップ・XP・ストリーク機能付きの革新的な自動プッシュツール。3秒インストール、全プロジェクト対応で開発効率UP。無料・オープンソース">
+    <meta name="description" content="Gitプッシュをゲーム化！新機能：軽量チーム開発+AI駆動PR作成。レベルアップ・XP・ストリーク機能付きの革新的な自動プッシュツール。3秒インストール、全プロジェクト対応で開発効率UP。無料・オープンソース">
     <meta name="keywords" content="Git,自動プッシュ,ゲーミフィケーション,開発ツール,プログラミング,GitHub,レベルアップ,XP,ストリーク,無料ツール,オープンソース">
     <meta name="author" content="Daiki Deguchi (@daideguchi)">
     <meta name="robots" content="index, follow">
@@ -313,6 +313,86 @@
             to { opacity: 1; }
         }
         
+        /* New Features Section */
+        .new-features {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .new-badge {
+            display: inline-block;
+            background: var(--gradient-accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .new-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .new-feature-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        
+        .new-feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+            border-color: var(--primary-color);
+        }
+        
+        .new-feature-card .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .new-feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+        
+        .new-feature-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-demo {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-demo code {
+            color: #00ff00;
+            font-size: 0.9rem;
+        }
+
         /* Features Section */
         .features {
             padding: 6rem 0;
@@ -702,6 +782,46 @@
         </div>
     </section>
 
+    <!-- New Features Highlight -->
+    <section class="new-features">
+        <div class="container">
+            <div class="new-badge">🆕 NEW</div>
+            <h2 class="section-title">🎮 チーム開発 + 🤖 AI機能 追加！</h2>
+            <p class="section-subtitle">
+                軽量で高速なチーム開発機能と、AI駆動の自動PR作成機能が新登場！
+            </p>
+            
+            <div class="new-features-grid">
+                <div class="new-feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>シンプルチーム開発</h3>
+                    <p>軽量設計で高速動作。簡単セットアップでチーム全体の開発効率UP</p>
+                    <div class="feature-demo">
+                        <code>ap --create-team "dev-team"</code>
+                    </div>
+                </div>
+                
+                <div class="new-feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI駆動PR作成</h3>
+                    <p>コミット履歴を分析してスマートなPRタイトルと説明文を自動生成</p>
+                    <div class="feature-demo">
+                        <code>ap --auto-pr</code>
+                    </div>
+                </div>
+                
+                <div class="new-feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>リアルタイム統計</h3>
+                    <p>チームの活動状況、コミット数、貢献者ランキングを瞬時に表示</p>
+                    <div class="feature-demo">
+                        <code>ap --team-dashboard</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
@@ -764,6 +884,24 @@
                         デフォルト通知OFFで煩わしさゼロの設計。
                     </p>
                 </div>
+                
+                <div class="feature-card floating" style="animation-delay: 1.2s;">
+                    <span class="feature-icon">👥</span>
+                    <h3 class="feature-title">軽量チーム開発</h3>
+                    <p class="feature-description">
+                        シンプルなプレーンテキスト設定でチーム機能を実現。
+                        重いJSONファイルを使わず、高速で軽量な動作を保証。
+                    </p>
+                </div>
+                
+                <div class="feature-card floating" style="animation-delay: 1.4s;">
+                    <span class="feature-icon">🤖</span>
+                    <h3 class="feature-title">AI自動PR作成</h3>
+                    <p class="feature-description">
+                        コミット履歴を分析してスマートなPRを自動生成。
+                        バグ修正、新機能、ドキュメント更新を自動判別。
+                    </p>
+                </div>
             </div>
         </div>
     </section>
@@ -811,6 +949,24 @@
             <div style="margin-top: 3rem; padding: 2rem; background: rgba(16, 185, 129, 0.1); border-radius: var(--border-radius); border: 1px solid rgba(16, 185, 129, 0.3);">
                 <h3 style="color: var(--success-color); margin-bottom: 1rem;">💡 Pro Tip</h3>
                 <p>インストール後は <code>ap --update</code> でいつでも最新版に更新できます。全プロジェクトが自動で同期されます！</p>
+            </div>
+            
+            <div style="margin-top: 2rem; padding: 2rem; background: rgba(99, 102, 241, 0.1); border-radius: var(--border-radius); border: 1px solid rgba(99, 102, 241, 0.3);">
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">🆕 新機能も試してみよう</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <code style="color: #00ff00;">ap --create-team "dev-team"</code>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">チーム作成</p>
+                    </div>
+                    <div>
+                        <code style="color: #00ff00;">ap --team-dashboard</code>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">チーム統計</p>
+                    </div>
+                    <div>
+                        <code style="color: #00ff00;">ap --auto-pr</code>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">AI PR作成</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
