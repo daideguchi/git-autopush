@@ -1294,7 +1294,265 @@ ENCOURAGEMENT_MESSAGES=(
     "素晴らしい進歩です！"
     "コミットマスターの称号に近づいています！"
     "開発の神が微笑んでいます！"
+    "🎉 AMAZING PUSH! 🎉"
+    "🌟 STELLAR WORK! 🌟"
+    "🔥 ON FIRE TODAY! 🔥"
+    "⚡ LIGHTNING FAST! ⚡"
+    "💎 DIAMOND QUALITY! 💎"
+    "🚀 TO THE MOON! 🚀"
+    "🏆 CHAMPION DEVELOPER! 🏆"
+    "🌈 MAGICAL CODING! 🌈"
+    "🎯 PERFECT SHOT! 🎯"
+    "🔮 FUTURE VISION! 🔮"
+    "🎪 SHOW STOPPER! 🎪"
+    "💫 COSMIC LEVEL! 💫"
+    "🎨 MASTERPIECE! 🎨"
+    "🦄 LEGENDARY STATUS! 🦄"
+    "🌠 SHOOTING STAR! 🌠"
+    "🎭 CODING ARTIST! 🎭"
+    "🎸 ROCK STAR DEV! 🎸"
+    "👑 CODING ROYALTY! 👑"
+    "🧙‍♂️ CODE WIZARD! 🧙‍♂️"
+    "⚔️ DEBUGGING WARRIOR! ⚔️"
+    "🏹 PRECISION CODER! 🏹"
+    "🎓 TECH GENIUS! 🎓"
 )
+
+# ランダムASCIIアート
+get_random_ascii_art() {
+    local arts=(
+        "   ✨    
+     ⭐  ✨  ⭐
+  ✨     🎉     ✨
+     ⭐  ✨  ⭐
+        ✨    "
+        
+        "   🎊 🎉 🎊
+    🎁   🎈   🎁
+  🎉  AWESOME!  🎉
+    🎁   🎈   🎁
+   🎊 🎉 🎊"
+   
+        "    🔥 🔥 🔥
+   🚀  EPIC!  🚀
+    🔥 🔥 🔥"
+    
+        "  💫   ⚡   💫
+    🌟 LEGENDARY! 🌟
+  💫   ⚡   💫"
+  
+        "    🎯 🎯 🎯
+   🏆  PERFECT!  🏆
+    🎯 🎯 🎯"
+    
+        "   🌈 ✨ 🌈
+  ✨  MAGICAL!  ✨
+   🌈 ✨ 🌈"
+   
+        " 💎 💎 💎 💎 💎
+   💎 DIAMOND! 💎
+ 💎 💎 💎 💎 💎"
+ 
+        "  🎪 🎠 🎪
+ 🎡 FANTASTIC! 🎡
+  🎪 🎠 🎪"
+  
+        "   🌟 🌟 🌟
+  🎆 INCREDIBLE! 🎆
+   🌟 🌟 🌟"
+   
+        "  🎵 🎵 🎵
+ 🎶 HARMONIOUS! 🎶
+  🎵 🎵 🎵"
+    )
+    
+    echo "${arts[$((RANDOM % ${#arts[@]}))]}"
+}
+
+# カラフルパーティクル効果
+show_particle_effect() {
+    local particles=("✨" "🌟" "⭐" "💫" "🌠" "⚡" "🔥" "💥" "🎊" "🎉" "💎" "🌈")
+    local colors=("${RED}" "${GREEN}" "${YELLOW}" "${BLUE}" "${PURPLE}" "${CYAN}" "${GOLD}")
+    
+    echo ""
+    for i in {1..3}; do
+        local line=""
+        for j in {1..20}; do
+            local particle="${particles[$((RANDOM % ${#particles[@]}))]}"
+            local color="${colors[$((RANDOM % ${#colors[@]}))]}"
+            line+="${color}${particle}${NC} "
+        done
+        echo -e "$line"
+        sleep 0.05
+    done
+    echo ""
+}
+
+# アニメーション花火
+show_fireworks() {
+    echo ""
+    local firework_frames=(
+        "       💥       "
+        "     💥💥💥     "
+        "   💥💥💥💥💥   "
+        " 💥💥💥💥💥💥💥 "
+        "💥💥💥💥💥💥💥💥💥"
+        " ⭐⭐⭐⭐⭐⭐⭐ "
+        "   ✨✨✨✨✨   "
+        "     ⚡⚡⚡     "
+        "       💫       "
+    )
+    
+    for frame in "${firework_frames[@]}"; do
+        echo -e "${GOLD}$frame${NC}"
+        sleep 0.1
+    done
+    echo ""
+}
+
+# レインボー効果
+show_rainbow_text() {
+    local text="$1"
+    local colors=("${RED}" "${YELLOW}" "${GREEN}" "${CYAN}" "${BLUE}" "${PURPLE}")
+    local output=""
+    
+    for (( i=0; i<${#text}; i++ )); do
+        local char="${text:$i:1}"
+        local color="${colors[$((i % ${#colors[@]}))]}"
+        output+="${color}${char}${NC}"
+    done
+    
+    echo -e "$output"
+}
+
+# プルス効果
+show_pulse_effect() {
+    local text="$1"
+    for i in {1..2}; do
+        echo -e "${GOLD}${text}${NC}"
+        sleep 0.2
+        echo -e "${YELLOW}${text}${NC}"
+        sleep 0.2
+    done
+}
+
+# スパークル波
+show_sparkle_wave() {
+    local wave1="✨        ✨        ✨        ✨"
+    local wave2="  ⭐        ⭐        ⭐      "
+    local wave3="    🌟        🌟        🌟    "
+    local wave4="      💫        💫        💫  "
+    
+    for i in {1..2}; do
+        echo -e "${GOLD}$wave1${NC}"
+        sleep 0.05
+        echo -e "${CYAN}$wave2${NC}"
+        sleep 0.05
+        echo -e "${PURPLE}$wave3${NC}"
+        sleep 0.05
+        echo -e "${BLUE}$wave4${NC}"
+        sleep 0.05
+    done
+}
+
+# レベルアップ超派手演出
+show_mega_levelup_effect() {
+    echo ""
+    show_fireworks
+    
+    show_rainbow_text "╔══════════════════════════════════════╗"
+    show_rainbow_text "║           LEVEL UP!!!                ║"
+    show_rainbow_text "║     🏆👑 CONGRATULATIONS! 👑🏆      ║"
+    show_rainbow_text "╚══════════════════════════════════════╝"
+    
+    show_particle_effect
+    show_sparkle_wave
+}
+
+# ランダム勝利演出
+show_random_victory_effect() {
+    local effects=(1 2 3 4 5)
+    local chosen_effect=${effects[$((RANDOM % ${#effects[@]}))]}
+    
+    case $chosen_effect in
+        1)  # ASCII アート + パーティクル
+            echo ""
+            echo -e "${GOLD}$(get_random_ascii_art)${NC}"
+            show_particle_effect
+            ;;
+        2)  # 花火
+            show_fireworks
+            ;;
+        3)  # スパークル波
+            show_sparkle_wave
+            ;;
+        4)  # レインボーテキスト
+            echo ""
+            show_rainbow_text "🎉 AMAZING PUSH! 🎉"
+            show_rainbow_text "✨ KEEP IT UP! ✨"
+            echo ""
+            ;;
+        5)  # パルス効果
+            echo ""
+            show_pulse_effect "🎯 BULLSEYE! 🎯"
+            show_pulse_effect "🚀 TO THE MOON! 🚀"
+            echo ""
+            ;;
+    esac
+}
+
+# 特別な日の演出
+show_special_day_effect() {
+    local day=$(date +%u)  # 1-7 (月-日)
+    local hour=$(date +%H)
+    
+    # 金曜日の夜は特別演出
+    if [ $day -eq 5 ] && [ $hour -ge 18 ]; then
+        echo ""
+        show_rainbow_text "🍻 FRIDAY NIGHT CODING! 🍻"
+        show_particle_effect
+        return
+    fi
+    
+    # 週末は休日演出
+    if [ $day -eq 6 ] || [ $day -eq 7 ]; then
+        echo ""
+        show_rainbow_text "🏖️ WEEKEND WARRIOR! 🏖️"
+        show_sparkle_wave
+        return
+    fi
+    
+    # 月曜日は励まし演出
+    if [ $day -eq 1 ]; then
+        echo ""
+        show_rainbow_text "💪 MONDAY MOTIVATION! 💪"
+        show_pulse_effect "🔥 Let's crush this week! 🔥"
+        return
+    fi
+}
+
+# コンボ演出（連続プッシュ）
+show_combo_effect() {
+    local streak=$1
+    
+    if [ $streak -ge 30 ]; then
+        echo ""
+        show_mega_levelup_effect
+        show_rainbow_text "🔥🔥🔥 LEGENDARY STREAK!!! 🔥🔥🔥"
+    elif [ $streak -ge 20 ]; then
+        echo ""
+        show_fireworks
+        show_rainbow_text "⚡⚡ EPIC STREAK!! ⚡⚡"
+    elif [ $streak -ge 10 ]; then
+        echo ""
+        show_particle_effect  
+        show_rainbow_text "🌟 SUPER STREAK! 🌟"
+    elif [ $streak -ge 5 ]; then
+        echo ""
+        show_sparkle_wave
+        show_rainbow_text "✨ COMBO! ✨"
+    fi
+}
 
 # ランダム励ましメッセージ取得
 get_encouragement() {
@@ -1304,6 +1562,8 @@ get_encouragement() {
 
 # レベルアップ効果表示
 show_levelup_effect() {
+    # 超派手なレベルアップ演出
+    show_mega_levelup_effect
     echo -e "${GOLD}${CROWN}${CROWN}${CROWN} LEVEL UP! ${CROWN}${CROWN}${CROWN}${NC}"
     echo -e "${MAGENTA}${SPARKLES} レベル $level に到達しました！ ${SPARKLES}${NC}"
     echo ""
@@ -1575,7 +1835,9 @@ fi
 show_progress_animation "🚀 リモートリポジトリにプッシュ中" 3
 if git push >/dev/null 2>&1; then
     echo ""
-    echo -e "${GREEN}${CHECK}${CHECK}${CHECK} 自動プッシュ完了！${CHECK}${CHECK}${CHECK}${NC}"
+    # プッシュ成功の派手演出
+    show_pulse_effect "${GREEN}${CHECK}${CHECK}${CHECK} 自動プッシュ完了！${CHECK}${CHECK}${CHECK}${NC}"
+    echo ""
     echo -e "${PURPLE}Repository: $(git remote get-url origin)${NC}"
     echo -e "${PURPLE}Branch: $(git branch --show-current)${NC}"
     echo -e "${PURPLE}Commit: $(git rev-parse --short HEAD)${NC}"
@@ -1618,6 +1880,16 @@ if git push >/dev/null 2>&1; then
         # 視覚的機能実行
         execute_visual_features
         
+        # ランダム勝利演出（毎回楽しい！）
+        show_random_victory_effect
+        
+        # 特別な日の演出
+        show_special_day_effect
+        
+        # コンボ演出（ストリークボーナス）
+        load_streak
+        show_combo_effect $current_streak
+        
         # 励ましメッセージ
         echo -e "${SPARKLES} ${MAGENTA}$(get_encouragement)${NC}"
         echo -e "${PARTY} ${GOLD}+50 XP獲得！${NC}"
@@ -1626,7 +1898,6 @@ if git push >/dev/null 2>&1; then
         send_all_notifications "🚀 Git Push 完了!" "$(get_encouragement) (+50 XP)" "3066993"
         
         # ストリーク表示
-        load_streak
         if [ $current_streak -gt 1 ]; then
             echo -e "${FIRE} ${RED}$current_streak日連続プッシュ！${NC}"
         fi
@@ -1638,3 +1909,4 @@ else
     echo -e "${RED}${WARNING} プッシュに失敗しました${NC}"
     exit 1
 fi
+デモ用更新
