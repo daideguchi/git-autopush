@@ -1826,9 +1826,9 @@ if git push >/dev/null 2>&1; then
         execute_visual_features
         
         # 特別な日の演出があるかチェック
-        local day=$(date +%u)
-        local hour=$(date +%H)
-        local has_special_day=false
+        day=$(date +%u)
+        hour=$(date +%H)
+        has_special_day=false
         
         # 特別な日の演出（優先）
         if [ $day -eq 5 ] && [ $hour -ge 18 ]; then
