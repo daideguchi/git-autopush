@@ -2086,7 +2086,7 @@ show_compact_animation() {
 # ランダムテック情報表示
 show_random_tech_tip() {
     local tip_index=$((RANDOM % ${#TECH_TIPS[@]}))
-    echo -e "${GOLD}${TECH_TIPS[$tip_index]}${NC}"
+    echo -e "${GOLD}豆知識： ${TECH_TIPS[$tip_index]}${NC}"
 }
 
 # レベルアップ効果表示
