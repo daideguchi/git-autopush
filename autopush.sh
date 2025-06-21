@@ -51,6 +51,10 @@ BELL="🔔"
 CAMERA="📸"
 CHART="📊"
 
+# バージョン情報
+TOOL_VERSION="2.0.0"
+TOOL_REPO="https://github.com/daideguchi/git-autopush"
+
 # データディレクトリとファイル
 STATS_DIR="$HOME/.autopush"
 STATS_FILE="$STATS_DIR/stats.txt"
@@ -189,15 +193,108 @@ for arg in "$@"; do
             exit 0
             ;;
         --install)
-            install_system_wide
+            # システム全体にインストール
+            echo -e "${GOLD}🔧 Git Auto Push Tool をシステム全体にインストール${NC}"
+            echo ""
+            
+            # インストール先ディレクトリ
+            install_dir="$HOME/bin"
+            install_path="$install_dir/git-autopush"
+            
+            # binディレクトリ作成
+            mkdir -p "$install_dir"
+            
+            # 現在のスクリプトをコピー
+            cp "$0" "$install_path"
+            chmod +x "$install_path"
+            
+            # エイリアス設定
+            echo ""
+            echo -e "${CYAN}📝 シェル設定を更新しています...${NC}"
+            
+            # .bashrc の更新
+            if ! grep -q "alias ap=" ~/.bashrc 2>/dev/null; then
+                echo "# Git Auto Push Tool" >> ~/.bashrc
+                echo "export PATH=\"\$HOME/bin:\$PATH\"" >> ~/.bashrc
+                echo "alias ap='$install_path'" >> ~/.bashrc
+            else
+                sed -i '' "s|alias ap=.*|alias ap='$install_path'|" ~/.bashrc 2>/dev/null || true
+            fi
+            
+            # .zshrc の更新
+            if ! grep -q "alias ap=" ~/.zshrc 2>/dev/null; then
+                echo "# Git Auto Push Tool" >> ~/.zshrc
+                echo "export PATH=\"\$HOME/bin:\$PATH\"" >> ~/.zshrc
+                echo "alias ap='$install_path'" >> ~/.zshrc
+            else
+                sed -i '' "s|alias ap=.*|alias ap='$install_path'|" ~/.zshrc 2>/dev/null || true
+            fi
+            
+            # .profile の更新
+            if ! grep -q "alias ap=" ~/.profile 2>/dev/null; then
+                echo "# Git Auto Push Tool" >> ~/.profile
+                echo "export PATH=\"\$HOME/bin:\$PATH\"" >> ~/.profile
+                echo "alias ap='$install_path'" >> ~/.profile
+            else
+                sed -i '' "s|alias ap=.*|alias ap='$install_path'|" ~/.profile 2>/dev/null || true
+            fi
+            
+            echo -e "${GREEN}✅ インストール完了！${NC}"
+            echo ""
+            echo -e "${YELLOW}📍 インストール場所: ${install_path}${NC}"
+            echo -e "${CYAN}🔄 シェルを再起動するか、以下を実行してください:${NC}"
+            echo -e "${GRAY}   source ~/.zshrc${NC}"
+            echo -e "${GRAY}   source ~/.bashrc${NC}"
+            echo ""
+            echo -e "${SPARKLES}${GREEN} これで全プロジェクトで同じ最新版が使用されます！${NC}"
             exit 0
             ;;
         --update)
-            update_tool
+            # ツール更新
+            echo -e "${GOLD}⬆️  Git Auto Push Tool を更新中...${NC}"
+            echo ""
+            
+            # インストール先パス
+            install_path="$HOME/bin/git-autopush"
+            
+            if [ -f "$install_path" ]; then
+                # 既存の設定バックアップ
+                echo -e "${CYAN}📋 設定をバックアップ中...${NC}"
+                cp -r "$STATS_DIR" "$STATS_DIR.backup.$(date +%Y%m%d_%H%M%S)" 2>/dev/null || true
+                
+                # GitHubから最新版を取得
+                echo -e "${CYAN}📥 最新版をダウンロード中...${NC}"
+                if command -v curl >/dev/null 2>&1; then
+                    if curl -s -o "/tmp/autopush.sh" "https://raw.githubusercontent.com/daideguchi/git-autopush/main/autopush.sh"; then
+                        chmod +x "/tmp/autopush.sh"
+                        cp "/tmp/autopush.sh" "$install_path"
+                        rm "/tmp/autopush.sh"
+                        echo -e "${GREEN}✅ 更新完了！${NC}"
+                        echo -e "${SPARKLES} 最新版 Git Auto Push Tool がインストールされました${NC}"
+                    else
+                        echo -e "${RED}❌ ダウンロードに失敗しました${NC}"
+                        echo -e "${YELLOW}手動で更新するか、ネットワーク接続を確認してください${NC}"
+                    fi
+                else
+                    echo -e "${YELLOW}⚠️  curl が見つかりません${NC}"
+                    echo -e "${CYAN}手動更新手順:${NC}"
+                    echo -e "1. ${TOOL_REPO} にアクセス"
+                    echo -e "2. 最新のautopush.sh をダウンロード"
+                    echo -e "3. cp autopush.sh $install_path"
+                fi
+            else
+                echo -e "${YELLOW}⚠️  システムワイドインストールが見つかりません${NC}"
+                echo -e "${CYAN}まず以下を実行してください:${NC}"
+                echo -e "${GRAY}   ./autopush.sh --install${NC}"
+            fi
             exit 0
             ;;
         --version)
-            show_version
+            echo -e "${GOLD}🚀 Git Auto Push Tool${NC}"
+            echo -e "${CYAN}Version: ${TOOL_VERSION}${NC}"
+            echo -e "${GRAY}Repository: ${TOOL_REPO}${NC}"
+            echo -e "${GRAY}Config: ${CONFIG_FILE}${NC}"
+            echo -e "${GRAY}Data: ${STATS_DIR}${NC}"
             exit 0
             ;;
         --theme)
@@ -538,9 +635,7 @@ turn_off_all_notifications() {
     echo -e "${GRAY}静かで平和なgit pushをお楽しみください 😌${NC}"
 }
 
-# バージョン情報
-TOOL_VERSION="2.0.0"
-TOOL_REPO="https://github.com/daideguchi/git-autopush"
+# バージョン情報（グローバル変数として最上位に移動）
 
 # バージョン表示
 show_version() {
