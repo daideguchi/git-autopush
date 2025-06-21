@@ -153,6 +153,11 @@
             100% { transform: rotate(360deg); }
         }
         
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
         /* Navigation */
         nav {
             position: fixed;
@@ -414,11 +419,11 @@
         }
         
         .new-features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+}
         
         .new-feature-card {
             background: rgba(255, 255, 255, 0.08);
@@ -434,8 +439,11 @@
         }
         
         .new-feature-card:nth-child(1) { animation-delay: 0s; }
-        .new-feature-card:nth-child(2) { animation-delay: 1s; }
-        .new-feature-card:nth-child(3) { animation-delay: 2s; }
+.new-feature-card:nth-child(2) { animation-delay: 0.3s; }
+.new-feature-card:nth-child(3) { animation-delay: 0.6s; }
+.new-feature-card:nth-child(4) { animation-delay: 0.9s; }
+.new-feature-card:nth-child(5) { animation-delay: 1.2s; }
+.new-feature-card:nth-child(6) { animation-delay: 1.5s; }
         
         .new-feature-card::before {
             content: '';
@@ -600,9 +608,9 @@
     <section class="new-features">
         <div class="container">
             <div class="new-badge">🆕 NEW</div>
-            <h2 class="section-title">🎮 チーム開発 + 🤖 AI機能 追加！</h2>
+            <h2 class="section-title">🎮 チーム開発 + 🤖 AI機能 + 💡 豆知識 追加！</h2>
             <p class="section-subtitle">
-                軽量で高速なチーム開発機能と、AI駆動の自動PR作成機能が新登場！
+                軽量で高速なチーム開発機能、AI駆動のPR作成、そして学習をサポートする豆知識システムが新登場！
             </p>
             
             <div class="new-features-grid">
@@ -630,6 +638,74 @@
                     <p>チームの活動状況、コミット数、貢献者ランキングを瞬時に表示</p>
                     <div class="feature-demo">
                         <code>ap --team-dashboard</code>
+                    </div>
+                </div>
+                
+                <div class="new-feature-card">
+                    <div class="feature-icon">💡</div>
+                    <h3>豆知識システム</h3>
+                    <p>プッシュ後にAI・テック・コマンド情報をランダム表示。50種類の最新技術情報で毎日学習</p>
+                    <div class="feature-demo">
+                        <code>豆知識： 🚀 Tech: Bun 1.0でNode.jsの3倍高速化</code>
+                    </div>
+                </div>
+                
+                <div class="new-feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>簡易アニメーション</h3>
+                    <p>場所を取らない1行スピナーアニメーション。高速処理でストレスフリーな体験</p>
+                    <div class="feature-demo">
+                        <code>🔄 変更をステージング中✅</code>
+                    </div>
+                </div>
+                
+                <div class="new-feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>ワンコマンド更新</h3>
+                    <p>全プロジェクトを一括で最新版に更新。設定とデータは自動バックアップ</p>
+                    <div class="feature-demo">
+                        <code>ap --update</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Terminal Demo Section -->
+    <section class="terminal-demo-section" style="padding: 6rem 0; background: rgba(0, 0, 0, 0.2); position: relative; z-index: 2;">
+        <div class="container">
+            <h2 class="section-title">🖥️ 実際の動作を見てみよう</h2>
+            <p class="section-subtitle">
+                高速タイピングアニメーションで実際のコマンド実行を体験
+            </p>
+            
+            <div class="terminal-demo" style="max-width: 900px; margin: 3rem auto;">
+                <div class="terminal" style="background: rgba(0, 0, 0, 0.9); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div class="terminal-header" style="background: rgba(255, 255, 255, 0.05); padding: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                        <div class="terminal-dots" style="display: flex; gap: 0.5rem;">
+                            <div class="dot red" style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f56;"></div>
+                            <div class="dot yellow" style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
+                            <div class="dot green" style="width: 12px; height: 12px; border-radius: 50%; background: #27ca3f;"></div>
+                        </div>
+                        <span>🎮 Git Auto Push - ゲーミングセッション</span>
+                    </div>
+                    <div class="terminal-content" style="padding: 2rem; font-family: 'Fira Code', monospace; font-size: 1rem; line-height: 1.6; color: #00ff00; min-height: 300px;">
+                        <div style="color: #667eea; font-weight: bold;">
+                            $ <span id="typing-text" style="border-right: 2px solid #00ff00; animation: blink 1s infinite;"></span>
+                        </div>
+                        <div id="terminal-output" style="opacity: 0; transition: opacity 0.5s ease; margin-top: 1rem;">
+                            <div style="color: #32cd32;">🔄 変更をステージング中...</div>
+                            <div style="color: #ffd700;">✅ ステージング完了</div>
+                            <div style="color: #32cd32;">📝 コミット作成中...</div>
+                            <div style="color: #ffd700;">✅ コミット完了</div>
+                            <div style="color: #32cd32;">🚀 リモートにプッシュ中...</div>
+                            <div style="color: #00ff00;">✅ プッシュ完了！</div>
+                            <div style="color: #ff69b4;">🎉 レベルアップ！ Level 15 → 16</div>
+                            <div style="color: #87ceeb;">💡 豆知識： 🤖 AI: Claude 3.5 Sonnetで2倍高速コーディング</div>
+                        </div>
+                        <div style="margin-top: 1rem; color: #888; font-size: 0.9rem;">
+                            💡 クリックしてアニメーションをリスタート
+                        </div>
                     </div>
                 </div>
             </div>
@@ -681,20 +757,28 @@
                 <p>インストール後は <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">ap --update</code> でいつでも最新版に更新できます。全プロジェクトが自動で同期されます！</p>
             </div>
             
-            <div style="margin-top: 2rem; padding: 2rem; background: rgba(99, 102, 241, 0.1); border-radius: var(--border-radius); border: 1px solid rgba(99, 102, 241, 0.3); animation: pulse 4s ease-in-out infinite;">
+                            <div style="margin-top: 2rem; padding: 2rem; background: rgba(99, 102, 241, 0.1); border-radius: var(--border-radius); border: 1px solid rgba(99, 102, 241, 0.3); animation: pulse 4s ease-in-out infinite;">
                 <h3 style="color: var(--primary-color); margin-bottom: 1rem;">🆕 新機能も試してみよう</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
                     <div style="animation: bounce 2s ease-in-out infinite;">
-                        <code style="color: #00ff00; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 4px; display: block;">ap --create-team "dev-team"</code>
+                        <code style="color: #00ff00; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 4px; display: block; font-size: 0.8rem;">ap --create-team "dev-team"</code>
                         <p style="font-size: 0.9rem; margin-top: 0.5rem;">チーム作成</p>
                     </div>
-                    <div style="animation: bounce 2s ease-in-out infinite 0.5s;">
-                        <code style="color: #00ff00; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 4px; display: block;">ap --team-dashboard</code>
+                    <div style="animation: bounce 2s ease-in-out infinite 0.3s;">
+                        <code style="color: #00ff00; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 4px; display: block; font-size: 0.8rem;">ap --team-dashboard</code>
                         <p style="font-size: 0.9rem; margin-top: 0.5rem;">チーム統計</p>
                     </div>
-                    <div style="animation: bounce 2s ease-in-out infinite 1s;">
-                        <code style="color: #00ff00; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 4px; display: block;">ap --auto-pr</code>
+                    <div style="animation: bounce 2s ease-in-out infinite 0.6s;">
+                        <code style="color: #00ff00; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 4px; display: block; font-size: 0.8rem;">ap --auto-pr</code>
                         <p style="font-size: 0.9rem; margin-top: 0.5rem;">AI PR作成</p>
+                    </div>
+                    <div style="animation: bounce 2s ease-in-out infinite 0.9s;">
+                        <code style="color: #00ff00; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 4px; display: block; font-size: 0.8rem;">ap --update</code>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">最新版に更新</p>
+                    </div>
+                    <div style="animation: bounce 2s ease-in-out infinite 1.2s;">
+                        <code style="color: #ffff00; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 4px; display: block; font-size: 0.8rem;">豆知識：毎回表示</code>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">学習サポート</p>
                     </div>
                 </div>
             </div>
@@ -844,16 +928,16 @@
             'ap "✨ 新機能実装完了"',
             'ap "🐛 バグ修正"',
             'ap "📝 ドキュメント更新"',
-            'ap',
+            'ap --update',
             'ap "🎉 リリース準備完了"'
         ];
         
         let commandIndex = 0;
         let charIndex = 0;
         let isDeleting = false;
-        const typingSpeed = 100;
-        const deletingSpeed = 50;
-        const pauseTime = 2000;
+        const typingSpeed = 40;
+        const deletingSpeed = 20;
+        const pauseTime = 1200;
         
         function typeWriter() {
             const currentCommand = commands[commandIndex];
@@ -917,84 +1001,6 @@
         });
     </script>
     
-    <!-- タイピング演出スクリプト -->
-    <script>
-        // 本物のタイピング演出
-        const commands = [
-            'ap "✨ 新機能実装完了"',
-            'ap "🐛 バグ修正"',
-            'ap "📝 ドキュメント更新"',
-            'ap',
-            'ap "🎉 リリース準備完了"'
-        ];
-        
-        let commandIndex = 0;
-        let charIndex = 0;
-        let isDeleting = false;
-        const typingSpeed = 100;
-        const deletingSpeed = 50;
-        const pauseTime = 2000;
-        
-        function typeWriter() {
-            const currentCommand = commands[commandIndex];
-            const typingElement = document.getElementById('typing-text');
-            
-            if (!typingElement) return;
-            
-            if (!isDeleting && charIndex < currentCommand.length) {
-                typingElement.textContent += currentCommand.charAt(charIndex);
-                charIndex++;
-                setTimeout(typeWriter, typingSpeed);
-            } else if (isDeleting && charIndex > 0) {
-                typingElement.textContent = currentCommand.substring(0, charIndex - 1);
-                charIndex--;
-                setTimeout(typeWriter, deletingSpeed);
-            } else if (!isDeleting && charIndex === currentCommand.length) {
-                // Show terminal output
-                if (commandIndex === 0) {
-                    setTimeout(() => {
-                        const output = document.getElementById('terminal-output');
-                        if (output) output.style.opacity = '1';
-                    }, 1000);
-                }
-                
-                setTimeout(() => {
-                    isDeleting = true;
-                    typeWriter();
-                }, pauseTime);
-            } else if (isDeleting && charIndex === 0) {
-                isDeleting = false;
-                commandIndex = (commandIndex + 1) % commands.length;
-                
-                // Hide terminal output when starting new cycle
-                if (commandIndex === 0) {
-                    const output = document.getElementById('terminal-output');
-                    if (output) output.style.opacity = '0';
-                }
-                
-                setTimeout(typeWriter, 500);
-            }
-        }
-        
-        // Start typing effect
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(typeWriter, 1000);
-        });
-        
-        // ターミナルクリック時にリスタート
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.terminal')) {
-                // リセット
-                commandIndex = 0;
-                charIndex = 0;
-                isDeleting = false;
-                const typingElement = document.getElementById('typing-text');
-                const output = document.getElementById('terminal-output');
-                if (typingElement) typingElement.textContent = '';
-                if (output) output.style.opacity = '0';
-                setTimeout(typeWriter, 500);
-            }
-        });
-    </script>
+
 </body>
 </html> 
