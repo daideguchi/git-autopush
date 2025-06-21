@@ -1909,4 +1909,3 @@ else
     echo -e "${RED}${WARNING} プッシュに失敗しました${NC}"
     exit 1
 fi
-デモ用更新
