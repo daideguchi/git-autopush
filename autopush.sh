@@ -2074,14 +2074,13 @@ show_compact_animation() {
     local colors=("${CYAN}" "${BLUE}" "${PURPLE}" "${MAGENTA}")
     
     echo -ne "${message} "
-    for i in $(seq 1 $((duration * 10))); do
+    for i in $(seq 1 $((duration * 8))); do
         local spinner_idx=$((i % ${#spinners[@]}))
-        local color_idx=$(((i / 3) % ${#colors[@]}))
-        echo -ne "${colors[$color_idx]}${spinners[$spinner_idx]}${NC}"
-        sleep 0.1
-        echo -ne "\b\b"
+        local color_idx=$(((i / 2) % ${#colors[@]}))
+        echo -ne "\b${colors[$color_idx]}${spinners[$spinner_idx]}${NC}"
+        sleep 0.12
     done
-    echo -e "${GREEN}✅${NC}"
+    echo -e "\b${GREEN}✅${NC}"
 }
 
 # ランダムテック情報表示
