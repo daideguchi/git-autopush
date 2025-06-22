@@ -1782,12 +1782,17 @@ show_repo_info() {
     echo ""
 }
 
-# コンパクトゲーム統計
+# コンパクトゲーム統計（文字化け対策）
 show_compact_game_stats() {
     if [ "$GAME_MODE" = true ]; then
         load_stats
         load_streak
-        echo -e "${GAME}Lv.$level ${LIGHTNING}$xp XP ${FIRE}$current_streak日 ${ROCKET}$total_pushes回 ${GRAY}(--stats で詳細)${NC}"
+        # 変数にデフォルト値を設定（文字化け防止）
+        local safe_level=${level:-1}
+        local safe_xp=${xp:-0}
+        local safe_current_streak=${current_streak:-0}
+        local safe_total_pushes=${total_pushes:-0}
+        echo -e "${GAME}Lv.$safe_level ${LIGHTNING}$safe_xp XP ${FIRE}$safe_current_streak日 ${ROCKET}$safe_total_pushes回 ${GRAY}(--stats で詳細)${NC}"
     fi
 }
 
