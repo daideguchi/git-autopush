@@ -2407,8 +2407,8 @@ echo ""
 generate_ai_commit_message() {
     local api_key="$1"
     
-    # 現在の日時を取得
-    local current_datetime=$(date '+%Y-%m-%d %H:%M')
+    # 日付フォーマット（DDMMYY）
+    local date_suffix=$(date '+%d%m%y')
     
     # 変更の差分を取得
     local diff_output=$(git diff --staged --name-status 2>/dev/null)
@@ -2419,44 +2419,85 @@ generate_ai_commit_message() {
     local modified_files=$(echo "$diff_output" | grep "^M" | wc -l | tr -d ' ')
     local deleted_files=$(echo "$diff_output" | grep "^D" | wc -l | tr -d ' ')
     
-    # 実際の変更内容を分析（重要な変更のみ抽出）
-    local actual_diff=$(git diff --staged --unified=1 2>/dev/null | head -50)
-    local diff_summary=""
+    # 実際の変更内容を詳細分析
+    local actual_diff=$(git diff --staged --unified=3 2>/dev/null)
+    local diff_lines=$(echo "$actual_diff" | wc -l | tr -d ' ')
     
-    # 変更内容の分析
-    if echo "$actual_diff" | grep -q "function\|def\|class\|const\|let\|var"; then
-        diff_summary="関数・変数定義の変更"
+    # ファイル拡張子による分類
+    local file_types=""
+    for file in $(echo "$diff_output" | cut -f2); do
+        case "$file" in
+            *.js|*.ts|*.jsx|*.tsx) file_types="${file_types}JavaScript/TypeScript " ;;
+            *.py) file_types="${file_types}Python " ;;
+            *.css|*.scss|*.sass) file_types="${file_types}CSS " ;;
+            *.html|*.htm) file_types="${file_types}HTML " ;;
+            *.md) file_types="${file_types}Markdown " ;;
+            *.txt) file_types="${file_types}テキスト " ;;
+            *.json|*.yaml|*.yml|*.toml) file_types="${file_types}設定 " ;;
+            *.sh|*.bash) file_types="${file_types}シェルスクリプト " ;;
+            *) file_types="${file_types}その他 " ;;
+        esac
+    done
+    file_types=$(echo "$file_types" | tr ' ' '\n' | sort -u | tr '\n' ',' | sed 's/,$//')
+    
+    # 詳細な変更種別の分析
+    local change_type=""
+    if echo "$actual_diff" | grep -q "^+.*function\|^+.*def\|^+.*class"; then
+        change_type="関数・クラス追加"
+    elif echo "$actual_diff" | grep -q "^-.*function\|^-.*def\|^-.*class"; then
+        change_type="関数・クラス削除"
+    elif echo "$actual_diff" | grep -q "function\|def\|class"; then
+        change_type="関数・クラス修正"
+    elif echo "$actual_diff" | grep -q "^+.*import\|^+.*require\|^+.*from"; then
+        change_type="依存関係追加"
+    elif echo "$actual_diff" | grep -q "^-.*import\|^-.*require\|^-.*from"; then
+        change_type="依存関係削除"
     elif echo "$actual_diff" | grep -q "import\|require\|from"; then
-        diff_summary="モジュール・ライブラリの変更"
-    elif echo "$actual_diff" | grep -q "echo\|print\|console\.log"; then
-        diff_summary="表示・出力の変更"
-    elif echo "$actual_diff" | grep -q "if\|else\|for\|while"; then
-        diff_summary="ロジック・制御構造の変更"
-    elif echo "$actual_diff" | grep -q "style\|css\|color\|font"; then
-        diff_summary="スタイル・デザインの変更"
-    elif echo "$actual_diff" | grep -q "test\|spec\|describe"; then
-        diff_summary="テストコードの変更"
-    elif echo "$actual_diff" | grep -q "README\|md\|doc"; then
-        diff_summary="ドキュメントの変更"
-    elif echo "$actual_diff" | grep -q "config\|setting\|env"; then
-        diff_summary="設定ファイルの変更"
+        change_type="依存関係変更"
+    elif echo "$actual_diff" | grep -q "echo\|print\|console\.log\|printf"; then
+        change_type="出力・ログ修正"
+    elif echo "$actual_diff" | grep -q "if\|else\|for\|while\|switch"; then
+        change_type="ロジック修正"
+    elif echo "$actual_diff" | grep -q "test\|spec\|describe\|it("; then
+        change_type="テスト修正"
+    elif echo "$actual_diff" | grep -q "style\|css\|color\|font\|margin\|padding"; then
+        change_type="スタイル修正"
+    elif echo "$actual_diff" | grep -q "config\|setting\|env\|\.json\|\.yaml"; then
+        change_type="設定変更"
+    elif echo "$actual_diff" | grep -q "README\|\.md\|documentation"; then
+        change_type="ドキュメント更新"
+    elif [ "$added_files" -gt 0 ] && [ "$modified_files" -eq 0 ] && [ "$deleted_files" -eq 0 ]; then
+        change_type="新規ファイル追加"
+    elif [ "$deleted_files" -gt 0 ]; then
+        change_type="ファイル削除"
     else
-        diff_summary="コード内容の変更"
+        change_type="コード修正"
     fi
     
-    # コミットメッセージ生成プロンプト
-    local prompt="以下のGit変更に対して、簡潔で有用なコミットメッセージを1行で生成してください。
+    # 具体的なファイル名（最大3つまで）
+    local main_files=$(echo "$changed_files" | cut -d',' -f1-3 | sed 's/,/, /g')
+    
+    # 詳細プロンプト
+    local prompt="以下のGit変更を分析して、具体的で詳細なコミットメッセージを生成してください。
 
-変更: 追加${added_files}件、変更${modified_files}件、削除${deleted_files}件
-ファイル: ${changed_files}
-内容: ${diff_summary}
+変更統計: 追加${added_files}件、変更${modified_files}件、削除${deleted_files}件
+対象ファイル: ${main_files}
+ファイル種別: ${file_types}
+変更種別: ${change_type}
+変更行数: ${diff_lines}行
 
 要件:
-- 絵文字1つ＋日本語で50文字以内
-- 変更内容を具体的に表現
-- 開発者が理解しやすい表現
+1. 絵文字1つで開始
+2. 具体的な変更内容を記述（どのファイルの何を変更したか）
+3. フォーマルだが理解しやすい表現
+4. 文末に (${date_suffix}) を追加
+5. 全体で80文字以内
 
-例: ✨ ユーザー認証機能を追加、🐛 ログイン不具合を修正、🔧 設定ファイルを整理"
+良い例:
+- 📝 autopush.shのAI生成機能を改善してプロンプト精度向上 (250622)
+- 🐛 ユーザー認証モジュールのトークン検証エラーを修正 (250622)
+- ✨ 新規コンポーネント「UserProfile.tsx」を追加 (250622)
+- 🔧 package.jsonの依存関係を最新版に更新 (250622)"
     
     # JSONエスケープ
     prompt=$(echo "$prompt" | sed 's/"/\\"/g' | tr '\n' ' ')
@@ -2470,7 +2511,7 @@ generate_ai_commit_message() {
             \"messages\": [
                 {\"role\": \"user\", \"content\": \"$prompt\"}
             ],
-            \"max_tokens\": 60,
+            \"max_tokens\": 120,
             \"temperature\": 0.3
         }" 2>/dev/null)
     
