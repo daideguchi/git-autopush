@@ -2323,8 +2323,8 @@ if [ ! -d ".git" ]; then
     exit 1
 fi
 
-# 変更があるかチェック
-if git diff --quiet && git diff --staged --quiet; then
+# 変更があるかチェック（未追跡ファイルも含む）
+if git diff --quiet && git diff --staged --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
     echo -e "${YELLOW}${PENCIL} 変更がありません。プッシュする必要はありません。${NC}"
     exit 0
 fi
