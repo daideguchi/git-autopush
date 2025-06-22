@@ -87,10 +87,14 @@ if [ ! -f "$CONFIG_FILE" ]; then
     echo "theme=default" >> "$CONFIG_FILE"
     echo "team_mode=false" >> "$CONFIG_FILE"
     echo "team_name=" >> "$CONFIG_FILE"
+    echo "openai_api_key=" >> "$CONFIG_FILE"
 fi
 
 # 設定読み込み
-source "$CONFIG_FILE"
+source "$CONFIG_FILE" 2>/dev/null || true
+
+# OpenAI APIキー設定（環境変数から取得）
+OPENAI_API_KEY=${openai_api_key:-${OPENAI_API_KEY:-""}}
 
 # フラグ変数
 GAME_MODE=$game_mode
@@ -2345,10 +2349,109 @@ git status --porcelain | while read line; do
 done
 echo ""
 
-# カスタムメッセージが指定されていない場合、自動生成
+# AIコミットメッセージ生成機能
+generate_ai_commit_message() {
+    local api_key="$1"
+    
+    # 変更の差分を取得
+    local diff_output=$(git diff --staged --name-status 2>/dev/null)
+    local changed_files=$(echo "$diff_output" | cut -f2 | tr '\n' ', ' | sed 's/,$//')
+    
+    # 変更されたファイルの統計
+    local added_files=$(echo "$diff_output" | grep "^A" | wc -l | tr -d ' ')
+    local modified_files=$(echo "$diff_output" | grep "^M" | wc -l | tr -d ' ')
+    local deleted_files=$(echo "$diff_output" | grep "^D" | wc -l | tr -d ' ')
+    
+    # シンプルなプロンプト
+    local prompt="Git変更を日本語コミットメッセージに。追加:${added_files}、変更:${modified_files}、削除:${deleted_files}。ファイル:${changed_files}。絵文字付き50文字以内。"
+    
+    # JSONエスケープ
+    prompt=$(echo "$prompt" | sed 's/"/\\"/g' | tr '\n' ' ')
+
+    # OpenAI APIに送信
+    local response=$(curl -s -X POST "https://api.openai.com/v1/chat/completions" \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $api_key" \
+        -d "{
+            \"model\": \"gpt-4o-mini\",
+            \"messages\": [
+                {\"role\": \"user\", \"content\": \"$prompt\"}
+            ],
+            \"max_tokens\": 60,
+            \"temperature\": 0.7
+        }" 2>/dev/null)
+    
+    # エラーチェック
+    if [ $? -ne 0 ]; then
+        echo "🔴 API接続エラー" >&2
+        return 1
+    fi
+    
+    if [ -z "$response" ]; then
+        echo "🔴 APIレスポンスが空" >&2
+        return 1
+    fi
+    
+    # エラーレスポンスチェック
+    if echo "$response" | grep -q '"error"'; then
+        local error_msg=$(echo "$response" | sed -n 's/.*"message":"\([^"]*\)".*/\1/p' | head -1)
+        echo "🔴 API エラー: $error_msg" >&2
+        return 1
+    fi
+    
+    # レスポンスからメッセージを抽出
+    if command -v jq >/dev/null 2>&1; then
+        local ai_message=$(echo "$response" | jq -r '.choices[0].message.content' 2>/dev/null)
+    else
+        # jqがない場合の簡易JSON解析
+        local ai_message=$(echo "$response" | sed -n 's/.*"content":"\([^"]*\)".*/\1/p' | head -1)
+    fi
+    
+    if [ -n "$ai_message" ] && [ "$ai_message" != "null" ] && [ "$ai_message" != "" ]; then
+        echo "$ai_message"
+        return 0
+    else
+        echo "🔴 AIメッセージ抽出失敗" >&2
+        return 1
+    fi
+}
+
+# カスタムメッセージが指定されていない場合、AI生成または自動生成
 if [ -z "$CUSTOM_MSG" ]; then
-    TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
-    COMMIT_MSG="🔄 自動更新 - $TIMESTAMP"
+    # APIキーが設定されている場合はAI生成を試行
+    if [ -n "$OPENAI_API_KEY" ]; then
+        AI_MSG=$(generate_ai_commit_message "$OPENAI_API_KEY" 2>&1)
+        AI_EXIT_CODE=$?
+        if [ $AI_EXIT_CODE -eq 0 ] && [ -n "$AI_MSG" ] && [[ "$AI_MSG" != *"🔴"* ]]; then
+            COMMIT_MSG="$AI_MSG"
+        else
+            echo -e "${RED}🚨 AI生成失敗${NC}"
+            echo -e "${YELLOW}📋 失敗理由:${NC} ${AI_MSG}"
+            echo -e "${CYAN}🔧 対策:${NC}"
+            
+            if [[ "$AI_MSG" == *"API接続エラー"* ]]; then
+                echo -e "  1. インターネット接続を確認してください"
+                echo -e "  2. OpenAI APIサービスの状態を確認: https://status.openai.com"
+                echo -e "  3. 再試行: ${YELLOW}ap \"手動メッセージ\"${NC}"
+            elif [[ "$AI_MSG" == *"API エラー"* ]]; then
+                echo -e "  1. APIキーが正しく設定されているか確認: ${YELLOW}echo \$OPENAI_API_KEY${NC}"
+                echo -e "  2. APIキーの有効性を確認: https://platform.openai.com/api-keys"
+                echo -e "  3. 使用制限に達していないか確認"
+            else
+                echo -e "  1. 環境変数を確認: ${YELLOW}echo \$OPENAI_API_KEY${NC}"
+                echo -e "  2. シェル再起動: ${YELLOW}source ~/.zshrc${NC}"
+                echo -e "  3. 手動実行: ${YELLOW}ap \"カスタムメッセージ\"${NC}"
+            fi
+            echo -e "${GRAY}💡 次のアクション: 上記対策を試すか、手動でメッセージを指定してください${NC}"
+            echo ""
+            
+            TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
+            COMMIT_MSG="🔄 自動更新 - $TIMESTAMP"
+        fi
+    else
+        TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
+        COMMIT_MSG="🔄 自動更新 - $TIMESTAMP"
+    fi
 else
     COMMIT_MSG="$CUSTOM_MSG"
 fi
@@ -2462,7 +2565,52 @@ if git push >/dev/null 2>&1; then
         echo ""
     fi
 else
-    echo -e "${RED}${WARNING} プッシュに失敗しました${NC}"
+    echo -e "${RED}🚨 プッシュに失敗しました${NC}"
+    echo ""
+    echo -e "${YELLOW}📋 失敗の詳細を確認中...${NC}"
+    
+    # 詳細なエラー情報を取得
+    local push_error=$(git push 2>&1)
+    echo -e "${RED}エラー内容:${NC}"
+    echo "$push_error" | head -10
+    echo ""
+    
+    echo -e "${CYAN}🔧 考えられる原因と対策:${NC}"
+    
+    if echo "$push_error" | grep -q "rejected"; then
+        echo -e "  ${YELLOW}原因:${NC} リモートに新しいコミットがあります"
+        echo -e "  ${CYAN}対策:${NC}"
+        echo -e "    1. ${YELLOW}git pull${NC} でリモートの変更を取得"
+        echo -e "    2. ${YELLOW}git push${NC} で再度プッシュ"
+        echo -e "    3. または ${YELLOW}ap${NC} で再実行"
+    elif echo "$push_error" | grep -q "Permission denied\|Authentication failed"; then
+        echo -e "  ${YELLOW}原因:${NC} 認証エラー"
+        echo -e "  ${CYAN}対策:${NC}"
+        echo -e "    1. GitHubトークンを確認: ${YELLOW}git config --global credential.helper${NC}"
+        echo -e "    2. SSHキーを確認: ${YELLOW}ssh -T git@github.com${NC}"
+        echo -e "    3. リモートURLを確認: ${YELLOW}git remote -v${NC}"
+    elif echo "$push_error" | grep -q "secret"; then
+        echo -e "  ${YELLOW}原因:${NC} GitHubシークレットスキャニング"
+        echo -e "  ${CYAN}対策:${NC}"
+        echo -e "    1. APIキーなどの機密情報をコミットから削除"
+        echo -e "    2. ${YELLOW}git reset --soft HEAD~1${NC} で直前コミット取り消し"
+        echo -e "    3. .gitignoreに機密ファイルを追加"
+    elif echo "$push_error" | grep -q "network\|timeout\|connection"; then
+        echo -e "  ${YELLOW}原因:${NC} ネットワークエラー"
+        echo -e "  ${CYAN}対策:${NC}"
+        echo -e "    1. インターネット接続を確認"
+        echo -e "    2. VPNを無効化して再試行"
+        echo -e "    3. しばらく待ってから ${YELLOW}ap${NC} で再実行"
+    else
+        echo -e "  ${YELLOW}原因:${NC} 不明なエラー"
+        echo -e "  ${CYAN}対策:${NC}"
+        echo -e "    1. リポジトリ状態を確認: ${YELLOW}git status${NC}"
+        echo -e "    2. リモート接続を確認: ${YELLOW}git remote -v${NC}"
+        echo -e "    3. 手動プッシュを試行: ${YELLOW}git push -v${NC}"
+    fi
+    
+    echo ""
+    echo -e "${GRAY}💡 次のアクション: 上記対策を試してから ${YELLOW}ap${NC} で再実行してください${NC}"
     exit 1
 fi
 
