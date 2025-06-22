@@ -2480,30 +2480,27 @@ generate_ai_commit_message() {
      # 実際の変更内容のサンプル（最初の10行）
      local change_sample=$(echo "$actual_diff" | grep "^[+-]" | head -10 | sed 's/^[+-]//' | tr '\n' ' ' | cut -c1-200)
      
+     # デバッグ用出力（一時的）
+     echo "DEBUG: main_files='$main_files'" >&2
+     echo "DEBUG: change_type='$change_type'" >&2
+     echo "DEBUG: file_types='$file_types'" >&2
+     
      # 詳細プロンプト
-     local prompt="以下のGit変更を分析して、実際の変更内容に基づいた具体的なコミットメッセージを生成してください。
+     local prompt="Git変更の詳細分析:
 
-実際の変更ファイル: ${main_files}
-ファイル種別: ${file_types}
-変更種別: ${change_type}
-変更統計: 追加${added_files}件、変更${modified_files}件、削除${deleted_files}件
-変更行数: ${diff_lines}行
-変更内容サンプル: ${change_sample}
+変更ファイル: $main_files
+ファイル種別: $file_types  
+変更種別: $change_type
+統計: 追加$added_files件、変更$modified_files件、削除$deleted_files件
 
-重要: 必ず実際のファイル名「${main_files}」を使用してください。
-
-要件:
+以下の要件でコミットメッセージを生成:
 1. 絵文字1つで開始
-2. 実際のファイル名と変更内容を具体的に記述
-3. フォーマルだが理解しやすい表現
-4. 文末に (${date_suffix}) を追加
-5. 全体で80文字以内
+2. 実際のファイル名を含める
+3. 具体的な変更内容を記述
+4. 文末に ($date_suffix) を追加
+5. 80文字以内
 
-良い例:
-- 📝 autopush.shのAI生成機能を改善してプロンプト精度向上 (250622)
-- 🐛 user.jsのログイン検証ロジックを修正 (250622)
-- ✨ 新規ファイル「UserProfile.tsx」を追加 (250622)
-- 🔧 package.jsonの依存関係を最新版に更新 (250622)"
+例: 📝 autopush.shのAI機能改善でプロンプト精度向上 ($date_suffix)"
     
     # JSONエスケープ
     prompt=$(echo "$prompt" | sed 's/"/\\"/g' | tr '\n' ' ')
