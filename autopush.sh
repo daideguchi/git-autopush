@@ -2412,6 +2412,10 @@ generate_ai_commit_message() {
     
     # 変更の差分を取得
     local diff_output=$(git diff --staged --name-status 2>/dev/null)
+    if [ -z "$diff_output" ]; then
+        # ステージされた変更がない場合は、全ての変更を確認
+        diff_output=$(git diff --name-status 2>/dev/null)
+    fi
     local changed_files=$(echo "$diff_output" | cut -f2 | tr '\n' ', ' | sed 's/,$//')
     
     # 変更されたファイルの統計
@@ -2421,6 +2425,9 @@ generate_ai_commit_message() {
     
     # 実際の変更内容を詳細分析
     local actual_diff=$(git diff --staged --unified=3 2>/dev/null)
+    if [ -z "$actual_diff" ]; then
+        actual_diff=$(git diff --unified=3 2>/dev/null)
+    fi
     local diff_lines=$(echo "$actual_diff" | wc -l | tr -d ' ')
     
     # ファイル拡張子による分類
@@ -2502,8 +2509,8 @@ generate_ai_commit_message() {
 
 例: 📝 autopush.shのAI機能改善でプロンプト精度向上 ($date_suffix)"
     
-    # JSONエスケープ
-    prompt=$(echo "$prompt" | sed 's/"/\\"/g' | tr '\n' ' ')
+         # JSONエスケープ（安全な方法）
+     prompt=$(printf '%s' "$prompt" | sed 's/"/\\"/g' | tr '\n' ' ')
 
     # OpenAI APIに送信
     local response=$(curl -s -X POST "https://api.openai.com/v1/chat/completions" \
