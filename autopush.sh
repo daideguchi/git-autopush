@@ -2444,20 +2444,27 @@ generate_ai_commit_message() {
         diff_summary="コード内容の変更"
     fi
     
-    # 日本人に分かりやすいコミットメッセージ生成プロンプト（詳細版）
-    local prompt="以下のGit変更を、日本人が理解しやすい簡潔で的確なコミットメッセージにしてください。
+    # より有用で詳細なコミットメッセージ生成プロンプト
+    local prompt="以下のGit変更を分析して、開発者にとって有用で記録価値のあるコミットメッセージを生成してください。
 
 変更統計: 追加${added_files}件、変更${modified_files}件、削除${deleted_files}件
 対象ファイル: ${changed_files}
 変更内容: ${diff_summary}
 実行日時: ${current_datetime}
 
-要求:
-1. 適切な絵文字を1つ付ける
-2. 40文字以内
-3. 実際の変更内容を反映
-4. 誰が見ても分かりやすい表現
-5. 機能追加/修正/改善などを明確に示す"
+コミットメッセージの要件:
+1. 適切な絵文字を1つ付ける（📝 ✨ 🐛 🔧 📦 🎨 ⚡ 🔥 など）
+2. 60文字以内で簡潔に
+3. 実際の変更内容を具体的に反映
+4. 将来の開発者が理解しやすい表現
+5. 変更の種類を明確に示す（機能追加/バグ修正/リファクタリング/ドキュメント更新など）
+6. 技術的な詳細も含める（例：「ログイン機能にバリデーション追加」「API応答速度を30%改善」など）
+
+良い例:
+- ✨ ユーザー認証機能を追加（JWT実装）
+- 🐛 データベース接続エラーを修正
+- 🔧 設定ファイルの環境変数を整理
+- 📝 API仕様書を最新版に更新"
     
     # JSONエスケープ
     prompt=$(echo "$prompt" | sed 's/"/\\"/g' | tr '\n' ' ')
@@ -2467,12 +2474,12 @@ generate_ai_commit_message() {
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer $api_key" \
         -d "{
-            \"model\": \"gpt-4o-mini\",
+            \"model\": \"gpt-4o\",
             \"messages\": [
                 {\"role\": \"user\", \"content\": \"$prompt\"}
             ],
-            \"max_tokens\": 60,
-            \"temperature\": 0.7
+            \"max_tokens\": 100,
+            \"temperature\": 0.3
         }" 2>/dev/null)
     
     # エラーチェック
