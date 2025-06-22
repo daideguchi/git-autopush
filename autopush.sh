@@ -1880,59 +1880,59 @@ ENCOURAGEMENT_MESSAGES=(
     "🎓 TECH GENIUS! 🎓"
 )
 
-# 🤖 AI・テック・コマンド情報配列
+# 🤖 開発に役立つ情報配列（日本人向け）
 TECH_TIPS=(
-    "💡 AI: ChatGPT-4oはコード生成が格段に向上"
-    "🚀 Tech: Bun 1.0でNode.jsの3倍高速化"
-    "⚡ Cmd: git log --oneline -10 で最新10コミット"
-    "🔧 Tool: GitHub Copilot Chat でインライン質問"
-    "📊 AI: Claude 3.5 Sonnetは長文解析が得意"
-    "🎯 Tech: Vite 5.0でHMRが爆速に"
-    "💻 Cmd: git stash push -m \"作業中\" で作業保存"
-    "🌐 AI: Perplexity Proでリアルタイム情報取得"
-    "⚙️ Tech: Docker Composeでマルチコンテナ管理"
-    "🔍 Cmd: grep -r \"検索語\" . で全ファイル検索"
-    "🧠 AI: GitHub Copilot Workspace で全体設計"
-    "📱 Tech: React 19のServer Componentsが革新的"
-    "🔄 Cmd: git rebase -i HEAD~3 でコミット整理"
-    "🎨 AI: MidJourney v6で超リアルな画像生成"
-    "⚡ Tech: Turbo 8でSPA並みの体験をMPAで"
-    "📝 Cmd: code . && git status で開発開始"
-    "🤖 AI: OpenAI o1は数学・論理問題に特化"
-    "🛠️ Tech: Astro 4.0で島アーキテクチャ完成"
-    "🔧 Cmd: npm audit fix で脆弱性自動修正"
-    "🎯 AI: Cursor IDE でペアプログラミング体験"
-    "🌟 Tech: Deno 2.0でNode.js互換性向上"
-    "💾 Cmd: git commit --amend で直前コミット修正"
-    "🔮 AI: v0.dev でReactコンポーネント自動生成"
-    "⚡ Tech: Rust製ツールでフロントエンド高速化"
-    "🎪 Cmd: git branch -d feature で不要ブランチ削除"
-    "🧪 AI: Anthropic Claude でコードレビュー"
-    "🚀 Tech: Vercel v0でゼロ設定デプロイ"
-    "📋 Cmd: pbcopy < file.txt でファイル内容コピー"
-    "🎨 AI: Stable Diffusion XLで商用レベル画像"
-    "⚙️ Tech: Cloudflare Workers でエッジ実行"
-    "🔥 AI: Gemini Pro 1.5で200万トークン処理"
-    "💻 Tech: Tauri 2.0でRust製デスクトップアプリ"
-    "⚡ Cmd: find . -name \"*.js\" -type f で JS ファイル検索"
-    "🎯 AI: Meta Code Llama でオープンソース開発"
-    "🌐 Tech: Web Components で再利用可能UI"
-    "🔧 Cmd: curl -I URL でHTTPヘッダー確認"
-    "🧠 AI: Microsoft Copilot でOffice自動化"
-    "📊 Tech: D3.js v7でデータビジュアライゼーション"
-    "🎪 Cmd: history | grep \"git\" で Git コマンド履歴"
-    "🔮 AI: Runway ML でAI動画生成"
-    "⚡ Tech: SvelteKit でフルスタック開発"
-    "💎 Cmd: jq '.' data.json で JSON 整形表示"
-    "🎨 AI: Adobe Firefly で商用安全AI画像"
-    "🚀 Tech: Nuxt 3でVue.jsフルスタック"
-    "🔍 Cmd: ps aux | grep node で Node プロセス確認"
-    "🤖 AI: Hugging Face でオープンソースAI"
-    "🌟 Tech: Solid.js で高速リアクティブUI"
-    "📝 Cmd: tail -f log.txt でリアルタイムログ監視"
-    "💡 AI: Poe.com で複数AI比較チャット"
-    "⚙️ Tech: Prisma でタイプセーフDB操作"
-    "🎯 Cmd: netstat -tulpn で開放ポート確認"
+    "💡 最新AI: ChatGPT-4oでコード生成が大幅改善"
+    "🚀 高速化: Bun 1.0でNode.jsより3倍速い"
+    "⚡ 使えるコマンド: git log --oneline -10 で最新10コミット確認"
+    "🔧 便利ツール: GitHub Copilot Chatでコード質問"
+    "📊 最新AI: Claude 3.5 Sonnetは長文解析が得意"
+    "🎯 高速開発: Vite 5.0でHMRが爆速に"
+    "💻 使えるコマンド: git stash push -m \"作業中\" で作業保存"
+    "🌐 最新AI: Perplexity Proでリアルタイム情報取得"
+    "⚙️ 開発環境: Docker Composeでマルチコンテナ管理"
+    "🔍 使えるコマンド: grep -r \"検索語\" . で全ファイル検索"
+    "🧠 最新AI: GitHub Copilot Workspaceで全体設計"
+    "📱 最新技術: React 19のServer Componentsが革新的"
+    "🔄 使えるコマンド: git rebase -i HEAD~3 でコミット整理"
+    "🎨 最新AI: MidJourney v6で超リアルな画像生成"
+    "⚡ 高速開発: Turbo 8でSPA並みの体験をMPAで実現"
+    "📝 使えるコマンド: code . && git status で開発開始"
+    "🤖 最新AI: OpenAI o1は数学・論理問題に特化"
+    "🛠️ 最新技術: Astro 4.0で島アーキテクチャ完成"
+    "🔧 使えるコマンド: npm audit fix で脆弱性自動修正"
+    "🎯 最新AI: Cursor IDEでペアプログラミング体験"
+    "🌟 最新技術: Deno 2.0でNode.js互換性向上"
+    "💾 使えるコマンド: git commit --amend で直前コミット修正"
+    "🔮 最新AI: v0.dev でReactコンポーネント自動生成"
+    "⚡ 高速化: Rust製ツールでフロントエンド高速化"
+    "🎪 使えるコマンド: git branch -d feature で不要ブランチ削除"
+    "🧪 最新AI: Anthropic Claudeでコードレビュー"
+    "🚀 高速開発: Vercel v0でゼロ設定デプロイ"
+    "📋 使えるコマンド: pbcopy < file.txt でファイル内容コピー"
+    "🎨 最新AI: Stable Diffusion XLで商用レベル画像"
+    "⚙️ 高速開発: Cloudflare Workersでエッジ実行"
+    "🔥 最新AI: Gemini Pro 1.5で200万トークン処理"
+    "💻 最新技術: Tauri 2.0でRust製デスクトップアプリ"
+    "⚡ 使えるコマンド: find . -name \"*.js\" -type f でJSファイル検索"
+    "🎯 最新AI: Meta Code Llamaでオープンソース開発"
+    "🌐 最新技術: Web Componentsで再利用可能UI"
+    "🔧 使えるコマンド: curl -I URL でHTTPヘッダー確認"
+    "🧠 最新AI: Microsoft CopilotでOffice自動化"
+    "📊 便利ツール: D3.js v7でデータ可視化"
+    "🎪 使えるコマンド: history | grep \"git\" でGitコマンド履歴"
+    "🔮 最新AI: Runway MLでAI動画生成"
+    "⚡ 高速開発: SvelteKitでフルスタック開発"
+    "💎 使えるコマンド: jq '.' data.json でJSON整形表示"
+    "🎨 最新AI: Adobe Fireflyで商用安全AI画像"
+    "🚀 高速開発: Nuxt 3でVue.jsフルスタック"
+    "🔍 使えるコマンド: ps aux | grep node でNodeプロセス確認"
+    "🤖 最新AI: Hugging Faceでオープンソース AI"
+    "🌟 最新技術: Solid.jsで高速リアクティブUI"
+    "📝 使えるコマンド: tail -f log.txt でリアルタイムログ監視"
+    "💡 最新AI: Poe.comで複数AI比較チャット"
+    "⚙️ 便利ツール: Prismaでタイプセーフ DB操作"
+    "🎯 使えるコマンド: netstat -tulpn で開放ポート確認"
 )
 
 # ランダムASCIIアート
@@ -2141,10 +2141,10 @@ show_compact_animation() {
     echo -e "\b${GREEN}✅${NC}"
 }
 
-# ランダムテック情報表示
+# ランダム開発情報表示
 show_random_tech_tip() {
     local tip_index=$((RANDOM % ${#TECH_TIPS[@]}))
-    echo -e "${GOLD}豆知識： ${TECH_TIPS[$tip_index]}${NC}"
+    echo -e "${GOLD}開発情報： ${TECH_TIPS[$tip_index]}${NC}"
 }
 
 # レベルアップ効果表示
@@ -2416,8 +2416,8 @@ generate_ai_commit_message() {
     local modified_files=$(echo "$diff_output" | grep "^M" | wc -l | tr -d ' ')
     local deleted_files=$(echo "$diff_output" | grep "^D" | wc -l | tr -d ' ')
     
-    # シンプルなプロンプト
-    local prompt="Git変更を日本語コミットメッセージに。追加:${added_files}、変更:${modified_files}、削除:${deleted_files}。ファイル:${changed_files}。絵文字付き50文字以内。"
+    # 日本人に分かりやすいコミットメッセージ生成プロンプト
+    local prompt="以下のGit変更を、日本人が理解しやすい簡潔で的確なコミットメッセージにしてください。追加:${added_files}件、変更:${modified_files}件、削除:${deleted_files}件。対象ファイル:${changed_files}。適切な絵文字を1つ付けて、40文字以内で、誰が見ても分かりやすい内容にしてください。"
     
     # JSONエスケープ
     prompt=$(echo "$prompt" | sed 's/"/\\"/g' | tr '\n' ' ')
