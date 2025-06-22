@@ -2487,30 +2487,23 @@ generate_ai_commit_message() {
      # 実際の変更内容のサンプル（最初の10行）
      local change_sample=$(echo "$actual_diff" | grep "^[+-]" | head -10 | sed 's/^[+-]//' | tr '\n' ' ' | cut -c1-200)
      
-     # デバッグ用出力（一時的）
-     echo "DEBUG: main_files='$main_files'" >&2
-     echo "DEBUG: change_type='$change_type'" >&2
-     echo "DEBUG: file_types='$file_types'" >&2
-     
-     # 詳細プロンプト
-     local prompt="Git変更の詳細分析:
+          # 簡潔なプロンプト（確実に動作するように）
+     local prompt="以下のファイル変更に対して、簡潔で具体的なコミットメッセージを1行で生成してください。
 
 変更ファイル: $main_files
-ファイル種別: $file_types  
 変更種別: $change_type
-統計: 追加$added_files件、変更$modified_files件、削除$deleted_files件
 
-以下の要件でコミットメッセージを生成:
-1. 絵文字1つで開始
-2. 実際のファイル名を含める
-3. 具体的な変更内容を記述
-4. 文末に ($date_suffix) を追加
-5. 80文字以内
+要件:
+- 絵文字1つで開始
+- ファイル名を含める  
+- 変更内容を簡潔に記述
+- 文末に($date_suffix)を追加
+- 70文字以内
 
-例: 📝 autopush.shのAI機能改善でプロンプト精度向上 ($date_suffix)"
-    
-         # JSONエスケープ（安全な方法）
-     prompt=$(printf '%s' "$prompt" | sed 's/"/\\"/g' | tr '\n' ' ')
+例: 📝 autopush.shのAI機能を改善($date_suffix)"
+     
+     # JSONエスケープ（改善版）
+     prompt=$(echo "$prompt" | sed 's/"/\\"/g; s/\\/\\\\/g' | tr '\n' ' ')
 
     # OpenAI APIに送信
     local response=$(curl -s -X POST "https://api.openai.com/v1/chat/completions" \
@@ -2521,7 +2514,7 @@ generate_ai_commit_message() {
             \"messages\": [
                 {\"role\": \"user\", \"content\": \"$prompt\"}
             ],
-            \"max_tokens\": 120,
+            \"max_tokens\": 80,
             \"temperature\": 0.3
         }" 2>/dev/null)
     
