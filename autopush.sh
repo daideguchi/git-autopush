@@ -2403,9 +2403,12 @@ git status --porcelain | while read line; do
 done
 echo ""
 
-# AIコミットメッセージ生成機能
+# AIコミットメッセージ生成機能（詳細分析版）
 generate_ai_commit_message() {
     local api_key="$1"
+    
+    # 現在の日時を取得
+    local current_datetime=$(date '+%Y-%m-%d %H:%M')
     
     # 変更の差分を取得
     local diff_output=$(git diff --staged --name-status 2>/dev/null)
@@ -2416,8 +2419,45 @@ generate_ai_commit_message() {
     local modified_files=$(echo "$diff_output" | grep "^M" | wc -l | tr -d ' ')
     local deleted_files=$(echo "$diff_output" | grep "^D" | wc -l | tr -d ' ')
     
-    # 日本人に分かりやすいコミットメッセージ生成プロンプト
-    local prompt="以下のGit変更を、日本人が理解しやすい簡潔で的確なコミットメッセージにしてください。追加:${added_files}件、変更:${modified_files}件、削除:${deleted_files}件。対象ファイル:${changed_files}。適切な絵文字を1つ付けて、40文字以内で、誰が見ても分かりやすい内容にしてください。"
+    # 実際の変更内容を分析（重要な変更のみ抽出）
+    local actual_diff=$(git diff --staged --unified=1 2>/dev/null | head -50)
+    local diff_summary=""
+    
+    # 変更内容の分析
+    if echo "$actual_diff" | grep -q "function\|def\|class\|const\|let\|var"; then
+        diff_summary="関数・変数定義の変更"
+    elif echo "$actual_diff" | grep -q "import\|require\|from"; then
+        diff_summary="モジュール・ライブラリの変更"
+    elif echo "$actual_diff" | grep -q "echo\|print\|console\.log"; then
+        diff_summary="表示・出力の変更"
+    elif echo "$actual_diff" | grep -q "if\|else\|for\|while"; then
+        diff_summary="ロジック・制御構造の変更"
+    elif echo "$actual_diff" | grep -q "style\|css\|color\|font"; then
+        diff_summary="スタイル・デザインの変更"
+    elif echo "$actual_diff" | grep -q "test\|spec\|describe"; then
+        diff_summary="テストコードの変更"
+    elif echo "$actual_diff" | grep -q "README\|md\|doc"; then
+        diff_summary="ドキュメントの変更"
+    elif echo "$actual_diff" | grep -q "config\|setting\|env"; then
+        diff_summary="設定ファイルの変更"
+    else
+        diff_summary="コード内容の変更"
+    fi
+    
+    # 日本人に分かりやすいコミットメッセージ生成プロンプト（詳細版）
+    local prompt="以下のGit変更を、日本人が理解しやすい簡潔で的確なコミットメッセージにしてください。
+
+変更統計: 追加${added_files}件、変更${modified_files}件、削除${deleted_files}件
+対象ファイル: ${changed_files}
+変更内容: ${diff_summary}
+実行日時: ${current_datetime}
+
+要求:
+1. 適切な絵文字を1つ付ける
+2. 40文字以内
+3. 実際の変更内容を反映
+4. 誰が見ても分かりやすい表現
+5. 機能追加/修正/改善などを明確に示す"
     
     # JSONエスケープ
     prompt=$(echo "$prompt" | sed 's/"/\\"/g' | tr '\n' ' ')
@@ -2499,12 +2539,12 @@ if [ -z "$CUSTOM_MSG" ]; then
             echo -e "${GRAY}💡 次のアクション: 上記対策を試すか、手動でメッセージを指定してください${NC}"
             echo ""
             
-            TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
-            COMMIT_MSG="🔄 自動更新 - $TIMESTAMP"
+            TIMESTAMP=$(date '+%m/%d %H:%M')
+            COMMIT_MSG="🔄 自動更新 ($TIMESTAMP)"
         fi
     else
-        TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
-        COMMIT_MSG="🔄 自動更新 - $TIMESTAMP"
+        TIMESTAMP=$(date '+%m/%d %H:%M')
+        COMMIT_MSG="🔄 自動更新 ($TIMESTAMP)"
     fi
 else
     COMMIT_MSG="$CUSTOM_MSG"
