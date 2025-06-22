@@ -517,6 +517,55 @@ for arg in "$@"; do
             echo -e "${GRAY}Data: ${STATS_DIR}${NC}"
             exit 0
             ;;
+        --set-openai-key)
+            shift
+            if [ -n "$1" ]; then
+                # APIキーを設定ファイルに保存
+                if [ -f "$CONFIG_FILE" ]; then
+                    # 既存の設定を更新
+                    if grep -q "openai_api_key=" "$CONFIG_FILE"; then
+                        sed -i.bak "s/openai_api_key=.*/openai_api_key=$1/" "$CONFIG_FILE" 2>/dev/null
+                    else
+                        echo "openai_api_key=$1" >> "$CONFIG_FILE"
+                    fi
+                else
+                    echo "openai_api_key=$1" > "$CONFIG_FILE"
+                fi
+                echo -e "${GREEN}✅ OpenAI APIキーを設定しました${NC}"
+                echo -e "${CYAN}🤖 これでAIが自動でコミットメッセージを生成します！${NC}"
+                echo -e "${YELLOW}💡 使用方法: ap (メッセージなし)${NC}"
+                shift
+            else
+                echo -e "${RED}❌ APIキーを指定してください${NC}"
+                echo -e "${YELLOW}使用方法: ap --set-openai-key YOUR_API_KEY${NC}"
+                exit 1
+            fi
+            exit 0
+            ;;
+        --show-openai-key)
+            if [ -n "$OPENAI_API_KEY" ]; then
+                # APIキーの最初の8文字と最後の4文字のみ表示
+                masked_key="${OPENAI_API_KEY:0:8}...${OPENAI_API_KEY: -4}"
+                echo -e "${CYAN}🔑 設定済みAPIキー: ${masked_key}${NC}"
+                if [ -n "$openai_api_key" ]; then
+                    echo -e "${GREEN}✅ ユーザー設定のAPIキーを使用中${NC}"
+                else
+                    echo -e "${BLUE}🌐 環境変数のAPIキーを使用中${NC}"
+                fi
+            else
+                echo -e "${YELLOW}⚠️  OpenAI APIキーが設定されていません${NC}"
+                echo -e "${CYAN}設定方法: ${YELLOW}export OPENAI_API_KEY=\"your-key\"${NC} を ~/.zshrc に追加${NC}"
+            fi
+            exit 0
+            ;;
+        --remove-openai-key)
+            if [ -f "$CONFIG_FILE" ]; then
+                sed -i.bak "s/openai_api_key=.*/openai_api_key=/" "$CONFIG_FILE" 2>/dev/null
+                echo -e "${GREEN}✅ OpenAI APIキーを削除しました${NC}"
+                echo -e "${BLUE}🌐 環境変数のAPIキーを使用します${NC}"
+            fi
+            exit 0
+            ;;
         --theme)
             shift
             if [ -n "$1" ]; then
@@ -2557,9 +2606,11 @@ if git push >/dev/null 2>&1; then
         # 通知統合送信
         send_all_notifications "🚀 Git Push 完了!" "$(get_encouragement) (+50 XP)" "3066993"
         
-        # ストリーク表示
-        if [ $current_streak -gt 1 ]; then
-            echo -e "${FIRE} ${RED}$current_streak日連続プッシュ！${NC}"
+        # ストリーク表示（文字化け対策）
+        load_streak  # ストリーク情報を再読み込み
+        safe_current_streak=${current_streak:-0}
+        if [ "$safe_current_streak" -gt 1 ] 2>/dev/null; then
+            echo -e "${FIRE} ${RED}${safe_current_streak}日連続プッシュ！${NC}"
         fi
         
         echo ""
