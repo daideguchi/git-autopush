@@ -2407,8 +2407,8 @@ echo ""
 generate_ai_commit_message() {
     local api_key="$1"
     
-    # 日付フォーマット（DDMMYY）
-    local date_suffix=$(date '+%d%m%y')
+    # 日付フォーマット（YYMMDD）
+    local date_suffix=$(date '+%y%m%d')
     
     # 変更の差分を取得
     local diff_output=$(git diff --staged --name-status 2>/dev/null)
@@ -2500,7 +2500,7 @@ generate_ai_commit_message() {
 - 文末に($date_suffix)を追加
 - 70文字以内
 
-例: 📝 autopush.shのAI機能を改善($date_suffix)"
+例: 📝 autopush.shのAI機能を改善(250623)"
      
      # JSONエスケープ（改善版）
      prompt=$(echo "$prompt" | sed 's/"/\\"/g; s/\\/\\\\/g' | tr '\n' ' ')
