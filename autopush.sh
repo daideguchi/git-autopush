@@ -1919,7 +1919,10 @@ show_compact_game_stats() {
         local safe_xp=${xp:-0}
         local safe_current_streak=${current_streak:-0}
         local safe_total_pushes=${total_pushes:-0}
-        echo -e "${GAME}Lv.$safe_level ⚡$safe_xp XP 🔥$safe_current_streak日 🚀$safe_total_pushes回 ${GRAY}(--stats で詳細)${NC}"
+        
+        # 文字化け対策：変数を文字列として確実に処理
+        printf "\033[0;90m🎮\033[0mLv.%s ⚡%s XP 🔥%s日 🚀%s回 \033[0;90m(--stats で詳細)\033[0m\n" \
+               "$safe_level" "$safe_xp" "$safe_current_streak" "$safe_total_pushes"
     fi
 }
 
