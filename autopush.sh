@@ -393,7 +393,7 @@ show_quick_commands() {
     echo -e "${YELLOW}🚀 Basic:${NC}"
     echo -e "${GRAY}  ap                     # Auto push with AI message${NC}"
     echo -e "${GRAY}  ap \"custom message\"    # Push with custom message${NC}"
-    echo -e "${GRAY}  ap --connection        # Check git connection${NC}"
+    echo -e "${GRAY}  ap -c / --connection   # Check git connection${NC}"
     echo -e "${GRAY}  ap --qc               # Show this list${NC}"
     
     echo -e "${YELLOW}📊 Info:${NC}"
@@ -418,7 +418,7 @@ show_quick_commands() {
     echo -e "${YELLOW}🔧 Setup:${NC}"
     echo -e "${GRAY}  ap --install          # System-wide install${NC}"
     echo -e "${GRAY}  ap --update           # Update tool${NC}"
-    echo -e "${GRAY}  ap --version          # Show version${NC}"
+    echo -e "${GRAY}  ap -v / --version     # Show version${NC}"
 }
 
 # 引数解析
@@ -608,14 +608,6 @@ for arg in "$@"; do
             fi
             exit 0
             ;;
-        --version)
-            echo -e "${GOLD}🚀 Git Auto Push Tool${NC}"
-            echo -e "${CYAN}Version: ${TOOL_VERSION}${NC}"
-            echo -e "${GRAY}Repository: ${TOOL_REPO}${NC}"
-            echo -e "${GRAY}Config: ${CONFIG_FILE}${NC}"
-            echo -e "${GRAY}Data: ${STATS_DIR}${NC}"
-            exit 0
-            ;;
         --set-openai-key)
             shift
             if [ -n "$1" ]; then
@@ -641,12 +633,20 @@ for arg in "$@"; do
             fi
             exit 0
             ;;
-        --git-status|--connection)
+        --git-status|--connection|-c)
             show_git_connection_status
             exit 0
             ;;
         --quick-commands|--qc)
             show_quick_commands
+            exit 0
+            ;;
+        --version|-v)
+            echo -e "${GOLD}🚀 Git Auto Push Tool${NC}"
+            echo -e "${CYAN}Version: ${TOOL_VERSION}${NC}"
+            echo -e "${GRAY}Repository: ${TOOL_REPO}${NC}"
+            echo -e "${GRAY}Config: ${CONFIG_FILE}${NC}"
+            echo -e "${GRAY}Data: ${STATS_DIR}${NC}"
             exit 0
             ;;
         --show-openai-key)
@@ -2474,8 +2474,9 @@ if [ "$SHOW_HELP" = true ]; then
     show_git_commands
     echo ""
     echo -e "${CYAN}🔗 New Commands:${NC}"
-    echo -e "${GRAY}  ap --connection        # Git接続状況確認${NC}"
+    echo -e "${GRAY}  ap -c / --connection   # Git接続状況確認${NC}"
     echo -e "${GRAY}  ap --qc               # クイックコマンド一覧${NC}"
+    echo -e "${GRAY}  ap -v / --version     # バージョン表示${NC}"
 fi
 
 # 情報表示のみの場合は終了
