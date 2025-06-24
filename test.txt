@@ -9,3 +9,4 @@
 // 日付フォーマット変更テスト
 test change
 test xp display
+test emoji fix

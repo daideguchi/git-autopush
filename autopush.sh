@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# 文字化け対策：UTF-8エンコーディング設定
+export LANG=ja_JP.UTF-8
+export LC_ALL=ja_JP.UTF-8
+
 # 🚀 Git Auto Push - 汎用自動プッシュツール with ゲーム要素！
 # 使用方法: ./autopush.sh [カスタムメッセージ] [オプション]
 # エイリアス: ap [カスタムメッセージ] [オプション]
@@ -1899,7 +1903,7 @@ show_compact_game_stats() {
         local safe_xp=${xp:-0}
         local safe_current_streak=${current_streak:-0}
         local safe_total_pushes=${total_pushes:-0}
-        echo -e "${GAME}Lv.$safe_level ${LIGHTNING}$safe_xp XP ${FIRE}$safe_current_streak日 ${ROCKET}$safe_total_pushes回 ${GRAY}(--stats で詳細)${NC}"
+        echo -e "${GAME}Lv.$safe_level ⚡$safe_xp XP 🔥$safe_current_streak日 🚀$safe_total_pushes回 ${GRAY}(--stats で詳細)${NC}"
     fi
 }
 
@@ -2792,7 +2796,7 @@ if git push >/dev/null 2>&1; then
         load_streak  # ストリーク情報を再読み込み
         safe_current_streak=${current_streak:-0}
         if [ "$safe_current_streak" -gt 1 ] 2>/dev/null; then
-            echo -e "${FIRE} ${RED}${safe_current_streak}日連続プッシュ！${NC}"
+            echo -e "${RED}🔥 ${safe_current_streak}日連続プッシュ！${NC}"
         fi
         
         echo ""
