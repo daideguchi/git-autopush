@@ -2259,7 +2259,7 @@ show_levelup_effect() {
     # 超派手なレベルアップ演出
     show_mega_levelup_effect
     echo -e "${GOLD}${CROWN}${CROWN}${CROWN} LEVEL UP! ${CROWN}${CROWN}${CROWN}${NC}"
-    echo -e "${MAGENTA}${SPARKLES} レベル $level に到達しました！ ${SPARKLES}${NC}"
+    echo -e "${MAGENTA}${SPARKLES} レベル $level に到達しました！ ${SPARKLES}${NC} ${GRAY}(累積: ${xp} XP)${NC}"
     echo ""
     
     # 通知統合送信
@@ -2725,6 +2725,7 @@ if git push >/dev/null 2>&1; then
         
         # 統計更新
         total_pushes=$((total_pushes + 1))
+        old_xp=$xp  # 累積XP表示用に保存
         xp=$((xp + 50))  # プッシュごとに50XP
         last_push_date=$(date '+%Y-%m-%d')
         
@@ -2778,14 +2779,14 @@ if git push >/dev/null 2>&1; then
         
         # 励ましメッセージ
         echo -e "${SPARKLES} ${MAGENTA}$(get_encouragement)${NC}"
-        echo -e "${PARTY} ${GOLD}+50 XP獲得！${NC}"
+        echo -e "${PARTY} ${GOLD}+50 XP獲得！${NC} ${GRAY}(累積: ${xp} XP)${NC}"
         
         # ランダムテック情報表示
         echo ""
         show_random_tech_tip
         
         # 通知統合送信
-        send_all_notifications "🚀 Git Push 完了!" "$(get_encouragement) (+50 XP)" "3066993"
+        send_all_notifications "🚀 Git Push 完了!" "$(get_encouragement) (+50 XP, 累積: ${xp} XP)" "3066993"
         
         # ストリーク表示（文字化け対策）
         load_streak  # ストリーク情報を再読み込み
