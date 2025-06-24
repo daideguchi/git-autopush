@@ -10,3 +10,4 @@
 test change
 test xp display
 test emoji fix
+test stats fix

@@ -3,6 +3,7 @@
 # 文字化け対策：UTF-8エンコーディング設定
 export LANG=ja_JP.UTF-8
 export LC_ALL=ja_JP.UTF-8
+export LC_CTYPE=ja_JP.UTF-8
 
 # 🚀 Git Auto Push - 汎用自動プッシュツール with ゲーム要素！
 # 使用方法: ./autopush.sh [カスタムメッセージ] [オプション]
@@ -832,7 +833,15 @@ fi
 
 # 統計読み込み関数
 load_stats() {
-    source "$STATS_FILE"
+    if [ -f "$STATS_FILE" ]; then
+        source "$STATS_FILE"
+    else
+        # デフォルト値設定
+        total_pushes=0
+        level=1
+        xp=0
+        last_push_date=""
+    fi
 }
 
 # 統計保存関数
@@ -845,7 +854,14 @@ save_stats() {
 
 # ストリーク読み込み関数
 load_streak() {
-    source "$STREAK_FILE"
+    if [ -f "$STREAK_FILE" ]; then
+        source "$STREAK_FILE"
+    else
+        # デフォルト値設定
+        current_streak=0
+        max_streak=0
+        last_streak_date=""
+    fi
 }
 
 # ストリーク保存関数
