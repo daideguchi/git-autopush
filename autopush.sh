@@ -322,6 +322,105 @@ start_team_event() {
     echo -e "${PARTY} イベント「${event_name}」開始！${NC}"
 }
 
+# Git接続状況確認
+show_git_connection_status() {
+    echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}🔗 Git Connection Status${NC}"
+    echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    # リポジトリチェック
+    if git rev-parse --git-dir >/dev/null 2>&1; then
+        echo -e "${GREEN}✅ Git Repository${NC}"
+        
+        # ブランチ情報
+        local current_branch=$(git branch --show-current 2>/dev/null)
+        echo -e "${CYAN}📍 Branch: ${current_branch:-'detached HEAD'}${NC}"
+        
+        # リモート情報
+        local remote_url=$(git remote get-url origin 2>/dev/null)
+        if [ -n "$remote_url" ]; then
+            echo -e "${GREEN}✅ Remote Connected${NC}"
+            echo -e "${CYAN}🌐 Origin: ${remote_url}${NC}"
+            
+            # 接続テスト（簡易）
+            if git ls-remote origin >/dev/null 2>&1; then
+                echo -e "${GREEN}✅ Remote Accessible${NC}"
+            else
+                echo -e "${YELLOW}⚠️  Remote Connection Issue${NC}"
+            fi
+        else
+            echo -e "${RED}❌ No Remote Origin${NC}"
+        fi
+        
+        # 作業ディレクトリ状態
+        local status_output=$(git status --porcelain 2>/dev/null)
+        if [ -z "$status_output" ]; then
+            echo -e "${GREEN}✅ Working Directory Clean${NC}"
+        else
+            local modified_count=$(echo "$status_output" | wc -l | tr -d ' ')
+            echo -e "${YELLOW}📝 ${modified_count} Uncommitted Changes${NC}"
+        fi
+        
+        # 最新コミット
+        local last_commit=$(git log -1 --format="%h %s" 2>/dev/null)
+        echo -e "${CYAN}📝 Last: ${last_commit}${NC}"
+        
+    else
+        echo -e "${RED}❌ Not a Git Repository${NC}"
+        echo -e "${GRAY}   Run: git init${NC}"
+    fi
+    
+    # ユーザー設定
+    local git_user=$(git config user.name 2>/dev/null)
+    local git_email=$(git config user.email 2>/dev/null)
+    
+    if [ -n "$git_user" ] && [ -n "$git_email" ]; then
+        echo -e "${GREEN}✅ User Config${NC}"
+        echo -e "${GRAY}   ${git_user} <${git_email}>${NC}"
+    else
+        echo -e "${YELLOW}⚠️  User Config Missing${NC}"
+        echo -e "${GRAY}   git config --global user.name \"Your Name\"${NC}"
+        echo -e "${GRAY}   git config --global user.email \"email@example.com\"${NC}"
+    fi
+}
+
+# 使用可能コマンドの目立たない列挙
+show_quick_commands() {
+    echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}⚡ Quick Commands${NC}"
+    echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    echo -e "${YELLOW}🚀 Basic:${NC}"
+    echo -e "${GRAY}  ap                     # Auto push with AI message${NC}"
+    echo -e "${GRAY}  ap \"custom message\"    # Push with custom message${NC}"
+    echo -e "${GRAY}  ap --connection        # Check git connection${NC}"
+    echo -e "${GRAY}  ap --qc               # Show this list${NC}"
+    
+    echo -e "${YELLOW}📊 Info:${NC}"
+    echo -e "${GRAY}  ap --info             # Repository information${NC}"
+    echo -e "${GRAY}  ap --stats            # Push statistics${NC}"
+    echo -e "${GRAY}  ap --help             # Full help${NC}"
+    
+    echo -e "${YELLOW}🎮 Game:${NC}"
+    echo -e "${GRAY}  ap --game             # Enable game mode${NC}"
+    echo -e "${GRAY}  ap --no-game          # Disable game mode${NC}"
+    echo -e "${GRAY}  ap --quit-game        # Permanently disable${NC}"
+    
+    echo -e "${YELLOW}👥 Team:${NC}"
+    echo -e "${GRAY}  ap --create-team \"name\" # Create team${NC}"
+    echo -e "${GRAY}  ap --join-team \"name\"   # Join team${NC}"
+    echo -e "${GRAY}  ap --team-dashboard    # Team dashboard${NC}"
+    
+    echo -e "${YELLOW}🤖 AI:${NC}"
+    echo -e "${GRAY}  ap --set-openai-key    # Set API key${NC}"
+    echo -e "${GRAY}  ap --auto-pr          # AI-generated PR${NC}"
+    
+    echo -e "${YELLOW}🔧 Setup:${NC}"
+    echo -e "${GRAY}  ap --install          # System-wide install${NC}"
+    echo -e "${GRAY}  ap --update           # Update tool${NC}"
+    echo -e "${GRAY}  ap --version          # Show version${NC}"
+}
+
 # 引数解析
 for arg in "$@"; do
     case $arg in
@@ -540,6 +639,14 @@ for arg in "$@"; do
                 echo -e "${YELLOW}使用方法: ap --set-openai-key YOUR_API_KEY${NC}"
                 exit 1
             fi
+            exit 0
+            ;;
+        --git-status|--connection)
+            show_git_connection_status
+            exit 0
+            ;;
+        --quick-commands|--qc)
+            show_quick_commands
             exit 0
             ;;
         --show-openai-key)
@@ -2365,6 +2472,10 @@ fi
 if [ "$SHOW_HELP" = true ]; then
     echo -e "${GRAY}─────────────────────────────────────────────────────────────────────────────${NC}"
     show_git_commands
+    echo ""
+    echo -e "${CYAN}🔗 New Commands:${NC}"
+    echo -e "${GRAY}  ap --connection        # Git接続状況確認${NC}"
+    echo -e "${GRAY}  ap --qc               # クイックコマンド一覧${NC}"
 fi
 
 # 情報表示のみの場合は終了
@@ -2562,26 +2673,7 @@ if [ -z "$CUSTOM_MSG" ]; then
         if [ $AI_EXIT_CODE -eq 0 ] && [ -n "$AI_MSG" ] && [[ "$AI_MSG" != *"🔴"* ]]; then
             COMMIT_MSG="$AI_MSG"
         else
-            echo -e "${RED}🚨 AI生成失敗${NC}"
-            echo -e "${YELLOW}📋 失敗理由:${NC} ${AI_MSG}"
-            echo -e "${CYAN}🔧 対策:${NC}"
-            
-            if [[ "$AI_MSG" == *"API接続エラー"* ]]; then
-                echo -e "  1. インターネット接続を確認してください"
-                echo -e "  2. OpenAI APIサービスの状態を確認: https://status.openai.com"
-                echo -e "  3. 再試行: ${YELLOW}ap \"手動メッセージ\"${NC}"
-            elif [[ "$AI_MSG" == *"API エラー"* ]]; then
-                echo -e "  1. APIキーが正しく設定されているか確認: ${YELLOW}echo \$OPENAI_API_KEY${NC}"
-                echo -e "  2. APIキーの有効性を確認: https://platform.openai.com/api-keys"
-                echo -e "  3. 使用制限に達していないか確認"
-            else
-                echo -e "  1. 環境変数を確認: ${YELLOW}echo \$OPENAI_API_KEY${NC}"
-                echo -e "  2. シェル再起動: ${YELLOW}source ~/.zshrc${NC}"
-                echo -e "  3. 手動実行: ${YELLOW}ap \"カスタムメッセージ\"${NC}"
-            fi
-            echo -e "${GRAY}💡 次のアクション: 上記対策を試すか、手動でメッセージを指定してください${NC}"
-            echo ""
-            
+            # APIキーエラーでも詳細なエラーメッセージは出力しない（ユーザー要求）
             TIMESTAMP=$(date '+%m/%d %H:%M')
             COMMIT_MSG="🔄 自動更新 ($TIMESTAMP)"
         fi
